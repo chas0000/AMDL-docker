@@ -55,7 +55,7 @@ jobs:
         path: |
           ${{ github.workspace }}/output
     - name: GH Release Action
-      uses: zcubbs/gh-release-action@v1.0.6
+      uses: softprops/action-gh-release@v1
       with:
         major: 1  # 主版本号
         minor: 0  # 次版本号
