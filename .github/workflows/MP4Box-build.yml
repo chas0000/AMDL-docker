@@ -22,7 +22,7 @@ jobs:
         ./configure --static-bin
         make
         ls -l ./bin/gcc
-        mv ./bin/gcc/MP4Box ${GITHUB_WORKSPACE}/output2
+        mv ./bin/gcc/MP4Box ${GITHUB_WORKSPACE}/MP4Box
         ls -l ${GITHUB_WORKSPACE}
 
     - name: Upload Go build artifacts
