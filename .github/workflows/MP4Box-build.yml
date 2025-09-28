@@ -31,3 +31,7 @@ jobs:
         name: MP4Box-output
         path: |
           ${{ github.workspace }}/MP4Box
+    - name: Create GitHub release and upload artifacts
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ github.workspace }}/MP4Box
