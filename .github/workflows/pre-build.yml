@@ -26,6 +26,7 @@ jobs:
             curl \
             bash \
             zlib-dev \
+            zlib1g-dev \
             ca-certificates && \
           cd /workspace  &&\
           git clone https://github.com/zhaarey/apple-music-downloader.git &&  \
