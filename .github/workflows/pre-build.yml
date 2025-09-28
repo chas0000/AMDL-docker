@@ -57,7 +57,6 @@ jobs:
     - name: GH Release Action
       uses: softprops/action-gh-release@v1
       with:
-        major: 1  # 主版本号
-        minor: 0  # 次版本号
-        github-token: ${{ secrets.GITHUB_TOKEN }}  # 使用 GitHub Token 进行认证
         files: ${{ github.workspace }}/output/* 
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
