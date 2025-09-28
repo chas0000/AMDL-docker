@@ -18,8 +18,8 @@ jobs:
       run: |
         mkdir -p ${GITHUB_WORKSPACE}/backup/z_amdl
         mkdir -p ${GITHUB_WORKSPACE}/backup/s_amdl
-        mv ${GITHUB_WORKSPACE}/output/z_amdl/config.yaml ${GITHUB_WORKSPACE}/backup/
-        mv ${GITHUB_WORKSPACE}/output/s_amdl/config.yaml ${GITHUB_WORKSPACE}/backup/
+        mv ${GITHUB_WORKSPACE}/output/z_amdl/config.yaml ${GITHUB_WORKSPACE}/backup/z_amdl/
+        mv ${GITHUB_WORKSPACE}/output/s_amdl/config.yaml ${GITHUB_WORKSPACE}/backup/s_amdl/
         
 
     - name: Set up QEMU
