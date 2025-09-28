@@ -34,13 +34,15 @@ jobs:
           mkdir -p /workspace/output/z_amdl &&  \
           mv /workspace/apple-music-downloader/dl /workspace/output/z_amdl && \
           mv /workspace/apple-music-downloader/config.yaml /workspace/output/z_amdl && \
-          cd /workspace  &&\
+          mkdir -p /workspace/sky &&\
+          cd /workspace/sky  &&\
+          mkdir 
           git clone https://github.com/sky8282/apple-music-downloader.git sky-amdl &&  \
           cd /workspace/sky-amdl &&  \
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dl main.go && \
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o sdl main.go && \
           mkdir -p /workspace/output/s_amdl &&  \
-          mv /workspace/apple-music-downloader/dl /workspace/output/s_amdl && \
-          mv /workspace/apple-music-downloader/config.yaml /workspace/output/s_amdl && \
+          mv /workspace/sky/apple-music-downloader/dl /workspace/output/s_amdl && \
+          mv /workspace/sky/apple-music-downloader/config.yaml /workspace/output/s_amdl && \
           cd /workspace  &&\
           wget \$(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url | grep 'ttyd.x86_64' | cut -d '\"' -f 4) && \
           mv ttyd.x86_64 /workspace/output/ttyd && \
