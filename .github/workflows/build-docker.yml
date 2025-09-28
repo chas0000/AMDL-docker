@@ -50,7 +50,7 @@ jobs:
           wget \$(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url | grep 'ttyd.x86_64' | cut -d '\"' -f 4) && \
           mv ttyd.x86_64 /workspace/output/ttyd && \
           chmod -R 777 /workspace/output && \
-          ls -l /workspace/output"
+          ls -lR /workspace/output"
 
     - name: Upload AMDL artifacts
       uses: actions/upload-artifact@v4
@@ -79,6 +79,7 @@ jobs:
 
     - name: Move files    
       run: |
+        ls -lR ${GITHUB_WORKSPACE}/output
         mkdir -p ${GITHUB_WORKSPACE}/backup/z_amdl
         mkdir -p ${GITHUB_WORKSPACE}/backup/s_amdl
         mv ${GITHUB_WORKSPACE}/output/z_amdl/config.yaml ${GITHUB_WORKSPACE}/backup/
