@@ -42,6 +42,7 @@ jobs:
           cd /workspace  &&\
           wget \$(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url | grep 'ttyd.x86_64' | cut -d '\"' -f 4) && \
           mv ttyd.x86_64 /workspace/output/ttyd && \
+          export PKG_CONFIG_PATH=/usr/lib/pkgconfig && \
           cd /workspace  &&\
           git clone https://github.com/gpac/gpac.git gpac_public && \
           cd /workspace/gpac_public && \
