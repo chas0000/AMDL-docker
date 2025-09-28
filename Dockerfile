@@ -25,7 +25,6 @@ WORKDIR /app
 # 拷贝二进制和配置文件
 COPY ./mp4decrypt /usr/bin/
 COPY ./MP4Box /usr/bin/
-COPY ./output/ttyd /usr/bin/
 COPY ./output/ /app/
 COPY ./backup/ /app/backup/
 COPY ./start.sh /app/
