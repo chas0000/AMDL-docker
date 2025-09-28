@@ -16,6 +16,7 @@ jobs:
 
     - name: Move files    
       run: |
+        ls -lR ${GITHUB_WORKSPACE}/output
         mkdir -p ${GITHUB_WORKSPACE}/backup/z_amdl
         mkdir -p ${GITHUB_WORKSPACE}/backup/s_amdl
         mv ${GITHUB_WORKSPACE}/output/z_amdl/config.yaml ${GITHUB_WORKSPACE}/backup/z_amdl/
