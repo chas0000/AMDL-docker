@@ -30,4 +30,4 @@ jobs:
       with:
         name: MP4Box-output
         path: |
-          ${{ github.workspace }}
+          ${{ github.workspace }}/MP4Box
