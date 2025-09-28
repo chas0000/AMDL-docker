@@ -25,9 +25,8 @@ WORKDIR /app
 # 拷贝二进制和配置文件
 
 COPY ./mp4decrypt /usr/bin/
-COPY .MP4box-output/MP4Box /usr/bin/
-COPY .amdl-output/ttyd /usr/bin/
-COPY ./dl /app/
+COPY ./MP4box-output/MP4Box /usr/bin/
+COPY ./amdl-output /app
 COPY ./config.yaml /app/amdl/
 COPY ./config.yaml /backup/
 COPY ./start.sh /app/
