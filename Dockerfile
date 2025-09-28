@@ -26,8 +26,8 @@ WORKDIR /app
 COPY ./mp4decrypt /usr/bin/
 COPY ./MP4Box /usr/bin/
 COPY ./output/ttyd /usr/bin/
-COPY ./output/ /app/
-COPY ./backup/ /app/
+COPY ./output/ /app/output/
+COPY ./backup/ /app/backup/
 COPY ./start.sh /app/
 
 # 赋予执行权限
