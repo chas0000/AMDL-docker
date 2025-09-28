@@ -28,7 +28,7 @@ COPY ./mp4decrypt /usr/bin/
 COPY ./MP4Box /usr/bin/
 COPY ./output/ttyd /usr/bin/
 COPY ./output/z_amdl/dl /app/z_amdl/
-COPY ./output/s_amdl/dl /app/s_amdl/
+COPY ./output/s_amdl/sdl /app/s_amdl/
 COPY ./backup /app/
 COPY ./start.sh /app/
 RUN chmod -R 755 /app &&  chmod 755 /usr/bin/mp4decrypt /usr/bin/ttyd /usr/bin/MP4Box /app/start.sh && ln -s /app/z_amdl/dl /usr/bin && && ln -s /app/s_amdl/sdl /usr/bin
