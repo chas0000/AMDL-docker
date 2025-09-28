@@ -2,14 +2,13 @@ FROM alpine:latest
 
 # 更新apk源并安装必要的包，包括中文字体、screen、nano、wget
 RUN apk update && \
-    apk add --no-cache \
-    screen \
-    nano \
-    wget \
-    ttf-wqy-zenhei \
-    bash \
-    ca-certificates \
-    && rm -rf /var/cache/apk/*
+    apk add --no-cache screen && \
+    apk add --no-cache nano && \
+    apk add --no-cache wget && \
+    apk add --no-cache ttf-wqy-zenhei && \
+    apk add --no-cache bash && \
+    apk add --no-cache ca-certificates && \
+    rm -rf /var/cache/apk/*
 
 # 设置中文语言环境
 RUN echo "export LANG=zh_CN.UTF-8" >> /etc/profile && \
