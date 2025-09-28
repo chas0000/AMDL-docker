@@ -59,16 +59,16 @@ jobs:
           ${{ github.workspace }}/output
     - name: Create a tag
       run: |
-          TAG_NAME="AMDL-v1.0.${{ github.run_id }}"  # 使用 run_id 或其他方式自动生成版本号
-          git tag $TAG_NAME
-          git remote set-url origin https://x-access-token:${{ secrets.MY_GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-          git push origin $TAG_NAME  # 推送标签到 GitHub
+       TAG_NAME="AMDL-v1.0.${{ github.run_id }}"  # 使用 run_id 或其他方式自动生成版本号
+       git tag $TAG_NAME
+       git remote set-url origin https://x-access-token:${{ secrets.MY_GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+       git push origin $TAG_NAME  # 推送标签到 GitHub
 
-      # 发布构建产物到 GitHub Release
+# 发布构建产物到 GitHub Release
     - name: Create GitHub Release and Upload Artifacts
       uses: softprops/action-gh-release@v1
       with:
-        tag: ${{ steps.create_tag.outputs.tag_name }}  # 使用创建的标签
+        tag_name: ${{ steps.create_tag.outputs.tag_name }}  # 使用创建的标签
         files: ${{ github.workspace }}/output/*  # 使用通配符上传 output 目录下的所有文件
       env:
         GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}  # 使用自定义的 GitHub Token 进行认证
