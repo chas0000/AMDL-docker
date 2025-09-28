@@ -31,7 +31,10 @@ jobs:
         name: MP4Box-output
         path: |
           ${{ github.workspace }}/MP4Box
-    - name: Create GitHub release and upload artifacts
-        uses: softprops/action-gh-release@v1
-        with:
-          files: ${{ github.workspace }}/MP4Box
+    - name: GH Release Action
+      uses: softprops/action-gh-release@v1
+      with:
+        major: 1  # 主版本号
+        minor: 0  # 次版本号
+        github-token: ${{ secrets.GITHUB_TOKEN }}  # 使用 GitHub Token 进行认证
+        files: ${{ github.workspace }}/MP4Box
