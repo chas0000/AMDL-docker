@@ -54,9 +54,15 @@ jobs:
         name: amdl-output
         path: |
           ${{ github.workspace }}/output
+    - name: Create a tag
+      run: |
+          TAG_NAME="AMDL-v1.0.${{ github.run_id }}"  # 使用 run_id 或其他方式自动生成版本号
+          git tag $TAG_NAME
+          git push origin $TAG_NAME  # 推送标签到 GitHub      
     - name: GH Release Action
       uses: softprops/action-gh-release@v1
       with:
+        tag: ${{ steps.create_tag.outputs.tag_name }}  # 使用创建的标签
         files: ${{ github.workspace }}/output/* 
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
