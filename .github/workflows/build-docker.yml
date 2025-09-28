@@ -15,12 +15,12 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Download MP4Box-output
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
         name: MP4Box-output
         
     - name: Download amdl-output
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
         name: amdl-output
     - name: Move files    
