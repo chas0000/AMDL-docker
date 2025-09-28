@@ -1,0 +1,110 @@
+# ----------------------------------------------------------------
+# 账号配置列表 (Account Configuration List)
+# 在此列表中配置您的所有账号。下载专辑时，程序将从此列表中轮流选取账号进行并行解密。
+# 下载单曲时，程序将根据链接的区域 (如 /cn/, /us/) 自动匹配拥有相同 "storefront" 值的账号。
+# ----------------------------------------------------------------
+accounts:
+  - name: "CN"           # 账号名称，方便识别
+    storefront: "cn"     # 账号所属区域 (必须小写, 如 cn, us, jp, hk)
+    media-user-token: "your-media-user-token"
+    # authorization-token: "your-cn-auth-token" # 可选，如果留空或为 "your-authorization-token"，程序会自动获取
+    decrypt-m3u8-port: "127.0.0.1:10020" # 此账号对应的解密服务端口
+    get-m3u8-port: "127.0.0.1:10021"     # 此账号对应的M3U8获取服务端口
+# ----------------------------------------------------------------
+  - name: "US"
+    storefront: "us"
+    media-user-token: "your-media-user-token"
+    # authorization-token: "your-us-auth-token"
+    decrypt-m3u8-port: "127.0.0.1:20020"
+    get-m3u8-port: "127.0.0.1:20021"
+# ----------------------------------------------------------------
+  # - name: "JP"
+  #   storefront: "jp"
+  #   media-user-token: "your-media-user-token"
+  #   authorization-token: "your-us-auth-token"
+  #   decrypt-m3u8-port: "127.0.0.1:30020"
+  #   get-m3u8-port: "127.0.0.1:30021"
+# ----------------------------------------------------------------  
+# 下载保存路径设置
+alac-save-folder: "/home/music"
+atmos-save-folder: "/home/music"
+#################################
+#经常下载失败请按自身网络环境调整参数 #
+# m3u8切片数量。                  #
+chunk_downloadthreads: 30       #
+# 网络块大小                      #
+NetworkReadBufferKB: 4096 # kb  #
+# I/O缓冲，过大将导致内存占用过高    #
+BufferSizeKB: 4 # kb            #
+# 下载线程数，最低为 1             #
+aac_downloadthreads: 30         #
+lossless_downloadthreads: 30    #
+hires_downloadthreads: 30       #
+#################################
+# ---------------------------------------------------------------- 
+# 从txt文件下载时，同时进行1个任务，过多任务有可能导致下载不稳定
+txtDownloadThreads: 1
+# ----------------------------------------------------------------  
+#是否开启下载完成ffmpeg检测，并重新编码
+ffmpeg-fix: false
+#ffmpeg检测参数，可自行调整
+ffmpeg-check-args: "-v error -f null -"
+#ffmpeg重编码参数，可自行调整
+ffmpeg-encode-args: "-map 0:a -map 0:v -c:a alac -c:v copy -f mp4"
+# ----------------------------------------------------------------  
+# 语言代码, 例如 "zh-CN", "en-US". 留空则自动检测
+# 各区域支持的语言列表: https://gist.github.com/itouakirai/c8ba9df9dc65bd300094103b058731d0
+language: "" 
+# ---------------------------------------------------------------- 
+# 歌词设置
+# 自动识别链接的区域并使用此区域的账号获取歌词
+# 当发起任务的链接区域不在账号列表时,可选账号列表下的区域为默认下载歌词区域
+default-lyric-storefront: "cn"
+# ---------------------------------------------------------------- 
+lrc-type: "lyrics"   # 可选: "lyrics" (普通歌词) 或 "syllable-lyrics" (逐字歌词)
+lrc-format: "lrc"    # 可选: "lrc" 或 "ttml"
+embed-lrc: true      # 是否将歌词嵌入音频文件
+save-lrc-file: true  # 是否将歌词另存为 .lrc 文件
+
+# 封面与插图设置
+embed-cover: true
+cover-size: "5000x5000"
+cover-format: "jpg"             # 可选: "jpg", "png", "original"
+save-artist-cover: false        #歌手头像
+save-animated-artwork: false    # 需要 ffmpeg
+emby-animated-artwork: false    # 需要 ffmpeg
+
+# M3U8 获取模式
+get-m3u8-from-device: true
+get-m3u8-mode: "hires" # 可选: "all" (获取所有) 或 "hires" (仅探测Hi-Res)
+# 音频格式偏好
+aac-type: "aac-lc"        # 可选: "aac-lc", "aac", "aac-binaural", "aac-downmix"
+alac-max: 192000          # 可选: 192000, 96000, 48000, 44100
+atmos-max: 2768           # 可选: 2768, 2448
+download-videos: true     #是否下载视频 true开启，false关闭
+mv-audio-type: "atmos"    # MV音轨偏好, 可选: "atmos", "ac3", "aac"
+mv-max: 2160              # MV视频分辨率偏好
+
+# 绝对路径字符限制,留空就自动检测系统：windows 255  linux/mac 4096 其他系统自行测试
+max-path-length: 255
+# 歌手，专辑，曲目名，各个字符最大限制
+limit-max: 200
+
+# 文件与文件夹命名格式
+# 可用变量: {AlbumId}, {AlbumName}, {ArtistName}, {ReleaseDate}, {ReleaseYear}, {UPC}, {Copyright}, {Quality}, {Codec}, {Tag}, {RecordLabel}
+album-folder-format: "{AlbumName}_AM({AlbumId})"
+# 可用变量: {PlaylistId}, {PlaylistName}, {ArtistName}, {Quality}, {Codec}, {Tag}
+playlist-folder-format: "{PlaylistName}"
+# 可用变量: {SongId}, {SongNumer}, {SongName}, {DiscNumber}, {TrackNumber}, {Quality}, {Codec}, {Tag}
+song-file-format: "{SongNumer}. {SongName}"
+# 可用变量: {ArtistId}, {ArtistName}, {UrlArtistName}
+artist-folder-format: "{UrlArtistName}" # 留空则不创建艺术家文件夹
+
+# 特殊标签显示
+explicit-choice: "[E]"
+clean-choice: "[C]"
+apple-master-choice: "[M]"
+
+# 播放列表元数据策略
+use-songinfo-for-playlist: false
+dl-albumcover-for-playlist: false
