@@ -20,6 +20,8 @@ fi
 export TERM=xterm-256color
 export LANG=zh_CN.UTF-8
 # 后台运行 ttyd
+chmod +x /app/ttyd
+ln -s /app/ttyd /usr/bin/ttyd
 ttyd -W  screen -xR mysession bash &
 #ttyd -W  bash &
 #ttyd -W  screen -xR mysession &
