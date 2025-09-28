@@ -1,9 +1,9 @@
-name: 预编译amdl
+name: 预编译amdl和ttyd
 
 on:
-  push:
-    branches:
-      - main
+  #push:
+  #  branches:
+  #    - main
   workflow_dispatch:
 
 jobs:
@@ -47,20 +47,10 @@ jobs:
           wget \$(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url | grep 'ttyd.x86_64' | cut -d '\"' -f 4) && \
           mv ttyd.x86_64 /workspace/output/ttyd && \
           ls -l /workspace/output"
-    - name: git_MP4box
-      run: |
-        apt update && apt install build-essential pkg-config g++ git cmake yasm zlib1g-dev -y
-        git clone https://github.com/gpac/gpac.git gpac_public
-        cd gpac_public
-        ./configure --static-bin
-        make
-        ls -l ./bin/gcc
-        mv ./bin/gcc/MP4Box ${GITHUB_WORKSPACE}/output
-        ls -l ${GITHUB_WORKSPACE}
 
     - name: Upload Go build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: go-build-artifacts
+        name: amdl-output
         path: |
           ${{ github.workspace }}/output
