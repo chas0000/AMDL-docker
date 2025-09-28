@@ -31,9 +31,9 @@ COPY ./start.sh /app/
 
 # 赋予执行权限
 RUN chmod -R 755 /app && \
-    chmod 755 /usr/bin/mp4decrypt /usr/bin/ttyd /usr/bin/MP4Box /app/start.sh && \
-    ln -s /app/z_amdl/dl /usr/bin/dl && \
-    ln -s /app/s_amdl/sdl /usr/bin/sdl
+    chmod 755 /usr/bin/mp4decrypt  /usr/bin/MP4Box /app/start.sh && \
+    ln -s /app/z_amdl/dl /usr/bin && \
+    ln -s /app/s_amdl/sdl /usr/bin
 
 EXPOSE 7681
 
