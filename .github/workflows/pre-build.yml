@@ -30,7 +30,7 @@ jobs:
           cd /workspace  &&\
           git clone https://github.com/zhaarey/apple-music-downloader.git &&  \
           cd /workspace/apple-music-downloader &&  \
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dl main.go && \
+          GOOS=linux GOARCH=amd64 go build -x -v -o dl main.go && \
           mkdir -p /workspace/output/z_amdl &&  \
           mv /workspace/apple-music-downloader/dl /workspace/output/z_amdl && \
           mv /workspace/apple-music-downloader/config.yaml /workspace/output/z_amdl && \
@@ -39,7 +39,7 @@ jobs:
           mkdir 
           git clone https://github.com/sky8282/apple-music-downloader.git  &&  \
           cd /workspace/sky/apple-music-downloader &&  \
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o sdl main.go && \
+          GOOS=linux GOARCH=amd64 go build -x -v -o sdl main.go && \
           mkdir -p /workspace/output/s_amdl &&  \
           mv /workspace/sky/apple-music-downloader/sdl /workspace/output/s_amdl && \
           mv /workspace/sky/apple-music-downloader/config.yaml /workspace/output/s_amdl && \
