@@ -32,9 +32,15 @@ jobs:
           cd /workspace/apple-music-downloader &&  \
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dl main.go && \
           mkdir -p /workspace/output/z_amdl &&  \
-          chmod -R 777 /workspace/output && \
           mv /workspace/apple-music-downloader/dl /workspace/output/z_amdl && \
           mv /workspace/apple-music-downloader/config.yaml /workspace/output/z_amdl && \
+          cd /workspace  &&\
+          git clone https://github.com/sky8282/apple-music-downloader.git sky-amdl &&  \
+          cd /workspace/sky-amdl &&  \
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dl main.go && \
+          mkdir -p /workspace/output/s_amdl &&  \
+          mv /workspace/apple-music-downloader/dl /workspace/output/s_amdl && \
+          mv /workspace/apple-music-downloader/config.yaml /workspace/output/s_amdl && \
           cd /workspace  &&\
           wget \$(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url | grep 'ttyd.x86_64' | cut -d '\"' -f 4) && \
           mv ttyd.x86_64 /workspace/output/ttyd && \
@@ -56,26 +62,3 @@ jobs:
         name: go-build-artifacts
         path: |
           ${{ github.workspace }}/output
-
-
-    - name: Create Release and Upload Artifacts
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: "v${{ github.run_number }}"
-        name: "Build Artifacts v${{ github.run_number }}"
-        body: "Automatic build from GitHub Actions"
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Upload release assets
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          z_amdl/**
-          ttyd
-          MP4Box
-          wrapper/**
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
