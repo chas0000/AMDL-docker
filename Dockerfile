@@ -1,11 +1,25 @@
-FROM ubuntu:latest
+FROM alpine:latest
 
-RUN apt update && apt install -y locales screen  nano wget fonts-wqy-microhei
-# 生成中文语言包
-RUN locale-gen zh_CN.UTF-8
-# 设置默认的语言环境为 zh_CN.UTF-8
-# RUN update-locale LANG=zh_CN.UTF-8 LC_ALL=zh_CN.UTF-8
-RUN rm -rf /var/lib/apt/lists/*
+# 安装必要的包，包括glibc支持语言环境、screen、nano、wget和中文字体
+RUN apk update && \
+    apk add --no-cache \
+    glibc-i18n \
+    screen \
+    nano \
+    wget \
+    ttf-wqy-zenhei
+
+# 生成中文语言环境
+RUN echo "zh_CN.UTF-8 UTF-8" >> /etc/locale.gen && \
+    locale-gen
+
+# 设置默认语言环境为zh_CN.UTF-8
+ENV LANG zh_CN.UTF-8
+ENV LC_ALL zh_CN.UTF-8
+
+# 清理缓存
+RUN rm -rf /var/cache/apk/*
+
 
 WORKDIR /app
 # 拷贝二进制和配置文件
