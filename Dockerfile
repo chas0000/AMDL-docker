@@ -23,11 +23,10 @@ RUN rm -rf /var/cache/apk/*
 
 WORKDIR /app
 # 拷贝二进制和配置文件
-COPY ./wrapper/ /app/
-COPY ./wrapper/ /backup/
+
 COPY ./mp4decrypt /usr/bin/
-COPY ./MP4Box /usr/bin/
-COPY ./ttyd /usr/bin/
+COPY .MP4box-output/MP4Box /usr/bin/
+COPY .amdl-output/ttyd /usr/bin/
 COPY ./dl /app/
 COPY ./config.yaml /app/amdl/
 COPY ./config.yaml /backup/
