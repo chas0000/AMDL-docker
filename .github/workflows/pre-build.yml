@@ -19,7 +19,6 @@ jobs:
         docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace alpine:latest sh -c "
           apk update && apk add --no-cache \
             git \
-            go=1.23.* \
             make \
             build-base \
             wget \
@@ -27,6 +26,10 @@ jobs:
             bash \
             zlib-dev \
             ca-certificates && \
+          wget https://golang.org/dl/go1.23.9.linux-amd64.tar.gz && \
+          tar -C /usr/local -xvzf go1.23.9.linux-amd64.tar.gz && \
+          export PATH=\$PATH:/usr/local/go/bin && \
+          go version && \  
           cd /workspace  &&\
           go mod tidy && \
           git clone https://github.com/zhaarey/apple-music-downloader.git &&  \
