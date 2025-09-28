@@ -2,13 +2,13 @@
 set -e
 
 # 1. 检查 /app/amdl/config.yaml 是否存在
-if [ ! -f /app/amdl/config.yaml ]; then
-    echo "配置文件不存在，拷贝 config.yml 到 /app"
-    cp /backup/config.yaml /app/amdl/
-    ls /app/amdl
-else
-    cp /app/amdl/config.yaml /app/
+if [ ! -f /app/z_amdl/config.yaml ]; then
+    cp /app/backup/z_amdl/config.yaml /app/z_amdl/
 fi
+if [ ! -f /app/s_amdl/config.yaml ]; then
+    cp /app/backup/s_amdl/config.yaml /app/s_amdl/
+fi
+
 
 # 2. 检查 /app/rootfs/data 是否为空
 if [ ! -d /app/rootfs/data ] || [ -z "$(ls -A /app/rootfs/data 2>/dev/null)" ]; then
