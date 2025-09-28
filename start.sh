@@ -2,11 +2,15 @@
 set -e
 
 # 1. 检查 /app/amdl/config.yaml 是否存在
-if [ ! -f /app/z_amdl/config.yaml ]; then
+if [ ! -f /app/config/z_amdl/config.yaml ]; then
     cp /app/backup/z_amdl/config.yaml /app/z_amdl/
+else
+    cp /app/config/z_amdl/config.yaml /app/z_amdl/config.yaml   
 fi
-if [ ! -f /app/s_amdl/config.yaml ]; then
+if [ ! -f /app/config/s_amdl/config.yaml ]; then
     cp /app/backup/s_amdl/config.yaml /app/s_amdl/
+else
+    cp /app/config/s_amdl/config.yaml /app/s_amdl/config.yaml     
 fi
 
 
