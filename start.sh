@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-
+echo "尝试启动"
 # 1. 检查 /app/amdl/config.yaml 是否存在
 if [ ! -f /app/config/z_amdl/config.yaml ]; then
     cp /app/backup/z_amdl/config.yaml /app/z_amdl/config.yaml
