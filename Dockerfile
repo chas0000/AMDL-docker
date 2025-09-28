@@ -5,7 +5,7 @@ RUN apk update && \
     apk add --no-cache screen && \
     apk add --no-cache nano && \
     apk add --no-cache wget && \
-    apk add --no-cache ttf-wqy-zenhei && \
+    apk add --no-cache ttf-dejavu && \
     apk add --no-cache bash && \
     apk add --no-cache ca-certificates && \
     rm -rf /var/cache/apk/*
