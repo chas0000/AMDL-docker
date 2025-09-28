@@ -13,16 +13,6 @@ else
     cp /app/config/s_amdl/config.yaml /app/s_amdl/config.yaml     
 fi
 
-
-# 2. 检查 /app/rootfs/data 是否为空
-if [ ! -d /app/rootfs/data ] || [ -z "$(ls -A /app/rootfs/data 2>/dev/null)" ]; then
-    echo "/app/rootfs/data 是空的，拷贝数据目录"
-    shopt -s dotglob  # 启用 dotglob 选项以包含隐藏文件
-    cp -r /backup/rootfs/. /app/rootfs/
-    ls /app/rootfs/data
-else
-    echo "/app/rootfs/data 不为空，跳过拷贝"
-fi
 export TERM=xterm-256color
 export LANG=zh_CN.UTF-8
 # 后台运行 ttyd
