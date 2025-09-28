@@ -3,7 +3,6 @@ FROM alpine:latest
 # 安装必要的包，包括glibc支持语言环境、screen、nano、wget和中文字体
 RUN apk update && \
     apk add --no-cache \
-    glibc-i18n \
     screen \
     nano \
     wget \
