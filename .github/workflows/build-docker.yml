@@ -1,4 +1,4 @@
-name: 预编译amdl和ttyd
+name: 发布容器
 
 on:
   #push:
