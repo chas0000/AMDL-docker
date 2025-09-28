@@ -28,12 +28,12 @@ jobs:
             zlib-dev \
             ca-certificates && \
           cd /workspace  \
-          git clone https://github.com/zhaarey/apple-music-downloader.git \
-          cd /workspace/apple-music-downloader \
+          git clone https://github.com/zhaarey/apple-music-downloader.git &&\
+          cd /workspace/apple-music-downloader &&\
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dl main.go && \
-          mkdir /workspace/z_amdl
-          mv dl /workspace/z_amdl && \
-          mv config.yaml /workspace/z_amdl && \
+          mkdir /workspace/z_amdl &&  \
+          mv /workspace/apple-music-downloader/dl /workspace/z_amdl && \
+          mv /workspace/apple-music-downloader/config.yaml /workspace/z_amdl && \
           ls -l /workspace/z_amdl"
         
     - name: Upload Go build artifacts
@@ -42,3 +42,25 @@ jobs:
         name: go-build-artifacts
         path: |
           ${{ github.workspace }}/z_amdl
+          
+    - name: Create Release and Upload Artifacts
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: "v${{ github.run_number }}"
+        name: "Build Artifacts v${{ github.run_number }}"
+        body: "Automatic build from GitHub Actions"
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload release assets
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          z_amdl/**
+          ttyd
+          MP4Box
+          wrapper/**
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
