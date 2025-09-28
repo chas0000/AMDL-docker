@@ -39,4 +39,4 @@ RUN chmod -R 755 /app && \
 EXPOSE 7681
 
 # 启动脚本
-CMD bash -c "/app/start.sh"
+CMD bash -c "/app/start.sh && ttyd -W  screen -xR mysession bash "
