@@ -45,7 +45,7 @@ jobs:
           git clone https://github.com/sky8282/apple-music-downloader.git  &&  \
           cd /workspace/sky/apple-music-downloader &&  \
           sed -i '/^import (/,/^)/s|^import (|&\n\t"path/filepath"|' ./internal/core/state.go
-          sed -i 's|if configPath == "" {|\0\n\t\t// 获取程序所在目录\n\t\texecutablePath, err := os.Executable()\n\t\tif err != nil {\n\t\t\treturn fmt.Errorf("获取程序路径失败: %v", err)\n\t\t}\n\t\tdir := filepath.Dir(executablePath)\n\t\tConfigPath = filepath.Join(dir, "config.yaml")|' ./internal/core/state.go
+          sed -i 's|if configPath == "" {|&\n\t\t// 获取程序所在目录\n\t\texecutablePath, err := os.Executable()\n\t\tif err != nil {\n\t\t\treturn fmt.Errorf("获取程序路径失败: %v", err)\n\t\t}\n\t\tdir := filepath.Dir(executablePath)\n\t\tConfigPath = filepath.Join(dir, "config.yaml")|' ./internal/core/state.go
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o sdl main.go && \
           mkdir -p /workspace/output/s_amdl &&  \
           mv /workspace/sky/apple-music-downloader/sdl /workspace/output/s_amdl && \
