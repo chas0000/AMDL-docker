@@ -32,6 +32,7 @@ jobs:
           cd /workspace/apple-music-downloader &&  \
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dl main.go && \
           mkdir -p /workspace/output/z_amdl &&  \
+          chmod -R 777 /workspace/output && \
           mv /workspace/apple-music-downloader/dl /workspace/output/z_amdl && \
           mv /workspace/apple-music-downloader/config.yaml /workspace/output/z_amdl && \
           cd /workspace  &&\
