@@ -1,0 +1,33 @@
+name: 预编译amdl
+
+on:
+  #push:
+  #  branches:
+  #    - main
+  workflow_dispatch:
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest  # 使用 GitHub 提供的 ubuntu runner
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: git_MP4box
+      run: |
+        apt update && apt install build-essential pkg-config g++ git cmake yasm zlib1g-dev -y
+        git clone https://github.com/gpac/gpac.git gpac_public
+        cd gpac_public
+        ./configure --static-bin
+        make
+        ls -l ./bin/gcc
+        mv ./bin/gcc/MP4Box ${GITHUB_WORKSPACE}/output2
+        ls -l ${GITHUB_WORKSPACE}
+
+    - name: Upload Go build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: MP4box-output
+        path: |
+          ${{ github.workspace }}/output2
