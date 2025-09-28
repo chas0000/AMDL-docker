@@ -26,11 +26,15 @@ WORKDIR /app
 
 COPY ./mp4decrypt /usr/bin/
 COPY ./MP4box-output/MP4Box /usr/bin/
-COPY ./amdl-output /app
+COPY ./amdl-output/ttyd /usr/bin/
+COPY ./amdl-output/z_amdl/dl /app/z_amdl/
+COPY ./amdl-output/s_amdl/dl /app/s_amdl/
+COPY ./amdl-output/z_amdl/config.yaml /app/backup/z_amdl/
+COPY ./amdl-output/s_amdl/config.yaml /app/backup/s_amdl/
 COPY ./config.yaml /app/amdl/
 COPY ./config.yaml /backup/
 COPY ./start.sh /app/
-RUN chmod -R 755 /app &&  chmod 755 /usr/bin/mp4decrypt /usr/bin/ttyd /usr/bin/MP4Box /app/start.sh && ln -s /app/dl /usr/bin
-EXPOSE 7681 10020 20020
+RUN chmod -R 755 /app &&  chmod 755 /usr/bin/mp4decrypt /usr/bin/ttyd /usr/bin/MP4Box /app/start.sh && ln -s /app/z_amdl/dl /usr/bin && && ln -s /app/s_amdl/sdl /usr/bin
+EXPOSE 7681 
 
-CMD bash -c "/app/start.sh && /app/wrapper ${args}"
+CMD bash -c "/app/start.sh "
