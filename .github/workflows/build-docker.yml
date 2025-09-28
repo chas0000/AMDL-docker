@@ -14,20 +14,73 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Download MP4Box-output
-      uses: actions/download-artifact@v4
-      with:
-        name: MP4Box-output
-        
-    - name: Download amdl-output
-      uses: actions/download-artifact@v4
+    - name: Build inside Alpine container
+      run: |
+        docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace alpine:latest sh -c "
+          apk update && apk add --no-cache \
+            git \
+            make \
+            build-base \
+            wget \
+            curl \
+            bash \
+            zlib-dev \
+            ca-certificates && \
+          wget https://golang.org/dl/go1.23.9.linux-amd64.tar.gz && \
+          tar -C /usr/local -xvzf go1.23.9.linux-amd64.tar.gz && \
+          export PATH=\$PATH:/usr/local/go/bin && \
+          go version && \ 
+          cd /workspace  &&\
+          git clone https://github.com/zhaarey/apple-music-downloader.git &&  \
+          cd /workspace/apple-music-downloader &&  \
+          GOOS=linux GOARCH=amd64 go build -x -v -o dl main.go && \
+          mkdir -p /workspace/output/z_amdl &&  \
+          mv /workspace/apple-music-downloader/dl /workspace/output/z_amdl && \
+          mv /workspace/apple-music-downloader/config.yaml /workspace/output/z_amdl && \
+          mkdir -p /workspace/sky &&\
+          cd /workspace/sky  &&\
+          mkdir 
+          git clone https://github.com/sky8282/apple-music-downloader.git  &&  \
+          cd /workspace/sky/apple-music-downloader &&  \
+          GOOS=linux GOARCH=amd64 go build -x -v -o sdl main.go && \
+          mkdir -p /workspace/output/s_amdl &&  \
+          mv /workspace/sky/apple-music-downloader/sdl /workspace/output/s_amdl && \
+          mv /workspace/sky/apple-music-downloader/config.yaml /workspace/output/s_amdl && \
+          cd /workspace  &&\
+          wget \$(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url | grep 'ttyd.x86_64' | cut -d '\"' -f 4) && \
+          mv ttyd.x86_64 /workspace/output/ttyd && \
+          ls -l /workspace/output"
+
+    - name: Upload AMDL artifacts
+      uses: actions/upload-artifact@v4
       with:
         name: amdl-output
+        path: |
+          ${{ github.workspace }}/output
+
+    - name: git_MP4box
+      run: |
+        apt update && apt install build-essential pkg-config g++ git cmake yasm zlib1g-dev -y
+        git clone https://github.com/gpac/gpac.git gpac_public
+        cd gpac_public
+        ./configure --static-bin
+        make
+        ls -l ./bin/gcc
+        mv ./bin/gcc/MP4Box ${GITHUB_WORKSPACE}
+        ls -l ${GITHUB_WORKSPACE}
+
+    - name: Upload Go build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: MP4Box-output
+        path: |
+          ${{ github.workspace }}/MP4Box
+
     - name: Move files    
       run: |
         mkdir -p ${GITHUB_WORKSPACE}/backup
-        mv ${GITHUB_WORKSPACE}/amdl-output/z_amdl/config ${GITHUB_WORKSPACE}/backup/
-        mv ${GITHUB_WORKSPACE}/amdl-output/s_amdl/config ${GITHUB_WORKSPACE}/backup/
+        mv ${GITHUB_WORKSPACE}/output/z_amdl/config ${GITHUB_WORKSPACE}/backup/
+        mv ${GITHUB_WORKSPACE}/output/s_amdl/config ${GITHUB_WORKSPACE}/backup/
         
 
     - name: Set up QEMU
