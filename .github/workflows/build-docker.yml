@@ -79,8 +79,8 @@ jobs:
     - name: Move files    
       run: |
         mkdir -p ${GITHUB_WORKSPACE}/backup
-        mv ${GITHUB_WORKSPACE}/output/z_amdl/config ${GITHUB_WORKSPACE}/backup/
-        mv ${GITHUB_WORKSPACE}/output/s_amdl/config ${GITHUB_WORKSPACE}/backup/
+        mv ${GITHUB_WORKSPACE}/output/z_amdl/config.yaml ${GITHUB_WORKSPACE}/backup/
+        mv ${GITHUB_WORKSPACE}/output/s_amdl/config.yaml ${GITHUB_WORKSPACE}/backup/
         
 
     - name: Set up QEMU
