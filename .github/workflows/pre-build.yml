@@ -26,7 +26,11 @@ jobs:
             curl \
             bash \
             zlib-dev \
-            zlib1g-dev \
+            pkgconfig \
+            g++ \
+            cmake \
+            yasm \
+            zlib-dev \
             ca-certificates && \
           cd /workspace  &&\
           git clone https://github.com/zhaarey/apple-music-downloader.git &&  \
