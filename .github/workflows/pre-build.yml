@@ -27,11 +27,12 @@ jobs:
             bash \
             zlib-dev \
             ca-certificates && \
+          cd /workspace && \
           go mod tidy && \
-          # 编译 Go 程序，生成静态链接的二进制文件
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dl main.go && \
-          mv dl /workspace && \
-          mv config.yaml /workspace && \
+          mkdir /workspace/z_amdl
+          mv dl /workspace/z_amdl && \
+          mv config.yaml /workspace/z_amdl && \
           ls -l /workspace"
         
     - name: Upload Go build artifacts
@@ -39,8 +40,8 @@ jobs:
       with:
         name: go-build-artifacts
         path: |
-          ${{ github.workspace }}/z_amdl/dl
-          ${{ github.workspace }}/z_amdl/config.yaml
+          ${{ github.workspace }}/z_amdl
+
 
     - name: Download ttyd
       run: |
