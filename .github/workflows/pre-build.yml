@@ -27,9 +27,9 @@ jobs:
             bash \
             zlib-dev \
             ca-certificates && \
-          cd /workspace  \
-          git clone https://github.com/zhaarey/apple-music-downloader.git &&\
-          cd /workspace/apple-music-downloader &&\
+          cd /workspace  &&\
+          git clone https://github.com/zhaarey/apple-music-downloader.git &&  \
+          cd /workspace/apple-music-downloader &&  \
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dl main.go && \
           mkdir /workspace/z_amdl &&  \
           mv /workspace/apple-music-downloader/dl /workspace/z_amdl && \
