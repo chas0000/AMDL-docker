@@ -14,14 +14,21 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Download MP4box-output
+    - name: Download MP4Box-output
       uses: actions/download-artifact@v2
       with:
-        name: MP4box-output
+        name: MP4Box-output
+        
     - name: Download amdl-output
       uses: actions/download-artifact@v2
       with:
-        name: amdl-output        
+        name: amdl-output
+    - name: Move files    
+      run: |
+        mkdir -p ${GITHUB_WORKSPACE}/backup
+        mv ${GITHUB_WORKSPACE}/amdl-output/z_amdl/config ${GITHUB_WORKSPACE}/backup/
+        mv ${GITHUB_WORKSPACE}/amdl-output/s_amdl/config ${GITHUB_WORKSPACE}/backup/
+        
 
     - name: Set up QEMU
       # QEMU 是用于在一种架构上模拟另一种架构的工具  
