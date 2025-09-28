@@ -1,4 +1,4 @@
-name: Build and Publish Docker Image
+name: 预编译amdl
 
 on:
   push:
@@ -27,13 +27,14 @@ jobs:
             bash \
             zlib-dev \
             ca-certificates && \
-          cd /workspace && \
-          go mod tidy && \
+          cd /workspace  \
+          git clone https://github.com/zhaarey/apple-music-downloader.git \
+          cd /workspace/apple-music-downloader \
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dl main.go && \
           mkdir /workspace/z_amdl
           mv dl /workspace/z_amdl && \
           mv config.yaml /workspace/z_amdl && \
-          ls -l /workspace"
+          ls -l /workspace/z_amdl"
         
     - name: Upload Go build artifacts
       uses: actions/upload-artifact@v4
@@ -41,66 +42,3 @@ jobs:
         name: go-build-artifacts
         path: |
           ${{ github.workspace }}/z_amdl
-
-
-    - name: Download ttyd
-      run: |
-        docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace alpine:latest sh -c "
-          apk add --no-cache \
-            wget \
-            curl && \
-          wget \$(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url | grep 'ttyd.x86_64' | cut -d '\"' -f 4) && \
-          mv ttyd.x86_64 /workspace/ttyd && \
-          ls -l /workspace"
-
-    - name: Upload ttyd artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: ttyd-artifacts
-        path: ${{ github.workspace }}/ttyd
-
-    - name: Build MP4Box (gpac) in Alpine
-      run: |
-        docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace alpine:latest sh -c "
-          apk add --no-cache \
-            build-base \
-            pkgconfig \
-            g++ \
-            git \
-            cmake \
-            yasm \
-            zlib-dev && \
-          git clone https://github.com/gpac/gpac.git gpac_public && \
-          cd gpac_public && \
-          ./configure --static-bin && \
-          make && \
-          mv ./bin/gcc/MP4Box /workspace && \
-          ls -l /workspace"
-
-    - name: Upload MP4Box artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: mp4box-artifacts
-        path: ${{ github.workspace }}/MP4Box
-
-    - name: Create Release and Upload Artifacts
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: "v${{ github.run_number }}"
-        name: "Build Artifacts v${{ github.run_number }}"
-        body: "Automatic build from GitHub Actions"
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Upload release assets
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          z_amdl/**
-          ttyd
-          MP4Box
-          wrapper/**
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
