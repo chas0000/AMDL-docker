@@ -54,9 +54,10 @@ jobs:
         name: amdl-output
         path: |
           ${{ github.workspace }}/output
-    - name: release and upload artifacts
-        uses: softprops/action-gh-release@v1
-        with:
-          files: ${{ github.workspace }}/output/*  # 使用通配符上传 output 目录下的所有文件
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: GH Release Action
+      uses: zcubbs/gh-release-action@v1.0.6
+      with:
+        major: 1  # 主版本号
+        minor: 0  # 次版本号
+        github-token: ${{ secrets.GITHUB_TOKEN }}  # 使用 GitHub Token 进行认证
+        files: ${{ github.workspace }}/output/* 
