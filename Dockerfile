@@ -1,28 +1,29 @@
 FROM alpine:latest
 
-# 安装必要的包，包括glibc支持语言环境、screen、nano、wget和中文字体
+# 更新apk源并安装必要的包，包括中文字体、screen、nano、wget
 RUN apk update && \
     apk add --no-cache \
     screen \
     nano \
     wget \
-    ttf-wqy-zenhei
+    ttf-wqy-zenhei \
+    bash \
+    ca-certificates \
+    && rm -rf /var/cache/apk/*
 
-# 生成中文语言环境
-RUN echo "zh_CN.UTF-8 UTF-8" >> /etc/locale.gen && \
-    locale-gen
+# 设置中文语言环境
+RUN echo "export LANG=zh_CN.UTF-8" >> /etc/profile && \
+    echo "export LANGUAGE=zh_CN:zh" >> /etc/profile && \
+    echo "export LC_ALL=zh_CN.UTF-8" >> /etc/profile
 
-# 设置默认语言环境为zh_CN.UTF-8
+# 设置环境变量
 ENV LANG zh_CN.UTF-8
 ENV LC_ALL zh_CN.UTF-8
 
-# 清理缓存
-RUN rm -rf /var/cache/apk/*
-
-
+# 工作目录
 WORKDIR /app
-# 拷贝二进制和配置文件
 
+# 拷贝二进制和配置文件
 COPY ./mp4decrypt /usr/bin/
 COPY ./MP4Box /usr/bin/
 COPY ./output/ttyd /usr/bin/
@@ -30,7 +31,14 @@ COPY ./output/z_amdl/dl /app/z_amdl/
 COPY ./output/s_amdl/sdl /app/s_amdl/
 COPY ./backup /app/
 COPY ./start.sh /app/
-RUN chmod -R 755 /app &&  chmod 755 /usr/bin/mp4decrypt /usr/bin/ttyd /usr/bin/MP4Box /app/start.sh && ln -s /app/z_amdl/dl /usr/bin && && ln -s /app/s_amdl/sdl /usr/bin
-EXPOSE 7681 
 
-CMD bash -c "/app/start.sh "
+# 赋予执行权限
+RUN chmod -R 755 /app && \
+    chmod 755 /usr/bin/mp4decrypt /usr/bin/ttyd /usr/bin/MP4Box /app/start.sh && \
+    ln -s /app/z_amdl/dl /usr/bin/dl && \
+    ln -s /app/s_amdl/sdl /usr/bin/sdl
+
+EXPOSE 7681
+
+# 启动脚本
+CMD bash -c "/app/start.sh"
