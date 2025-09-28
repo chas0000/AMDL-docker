@@ -1,0 +1,105 @@
+name: Build and Publish Docker Image
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest  # 使用 GitHub 提供的 ubuntu runner
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Build inside Alpine container
+      run: |
+        docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace alpine:latest sh -c "
+          apk update && apk add --no-cache \
+            git \
+            go \
+            make \
+            build-base \
+            wget \
+            curl \
+            bash \
+            zlib-dev \
+            ca-certificates && \
+          go mod tidy && \
+          # 编译 Go 程序，生成静态链接的二进制文件
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dl main.go && \
+          mv dl /workspace && \
+          mv config.yaml /workspace && \
+          ls -l /workspace"
+        
+    - name: Upload Go build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: go-build-artifacts
+        path: |
+          ${{ github.workspace }}/z_amdl/dl
+          ${{ github.workspace }}/z_amdl/config.yaml
+
+    - name: Download ttyd
+      run: |
+        docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace alpine:latest sh -c "
+          apk add --no-cache \
+            wget \
+            curl && \
+          wget \$(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url | grep 'ttyd.x86_64' | cut -d '\"' -f 4) && \
+          mv ttyd.x86_64 /workspace/ttyd && \
+          ls -l /workspace"
+
+    - name: Upload ttyd artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ttyd-artifacts
+        path: ${{ github.workspace }}/ttyd
+
+    - name: Build MP4Box (gpac) in Alpine
+      run: |
+        docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace alpine:latest sh -c "
+          apk add --no-cache \
+            build-base \
+            pkgconfig \
+            g++ \
+            git \
+            cmake \
+            yasm \
+            zlib-dev && \
+          git clone https://github.com/gpac/gpac.git gpac_public && \
+          cd gpac_public && \
+          ./configure --static-bin && \
+          make && \
+          mv ./bin/gcc/MP4Box /workspace && \
+          ls -l /workspace"
+
+    - name: Upload MP4Box artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: mp4box-artifacts
+        path: ${{ github.workspace }}/MP4Box
+
+    - name: Create Release and Upload Artifacts
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: "v${{ github.run_number }}"
+        name: "Build Artifacts v${{ github.run_number }}"
+        body: "Automatic build from GitHub Actions"
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload release assets
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          z_amdl/**
+          ttyd
+          MP4Box
+          wrapper/**
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
