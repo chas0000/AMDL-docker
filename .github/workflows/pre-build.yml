@@ -19,7 +19,7 @@ jobs:
         docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace alpine:latest sh -c "
           apk update && apk add --no-cache \
             git \
-            go=1.24.7 \
+            go \
             make \
             build-base \
             wget \
