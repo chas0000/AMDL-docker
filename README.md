@@ -17,6 +17,7 @@
               ├── config/  
               ├── rootfs/  
               └── docker-compose.yml
+    
     config放置两个配置文件 config.yaml为zhaarey佬原版，对应dl命令使用；sky_config.yaml为sky8282佬多线程版，对应sdl使用。
     
     注意：sky8282佬多线程版需要根据自己实际网络情况配置分片和线程数，这里不提供教程，因为我也不会，我就是瞎试一个不崩的参数就一直用。
