@@ -49,7 +49,7 @@ jobs:
     - name: Download ttyd
       run: |
         wget $(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url | grep 'ttyd.x86_64' | cut -d '\"' -f 4)
-        mv ttyd.x86_64 ${GITHUB_WORKSPACE}/output/ttyd
+        cp ttyd.x86_64 ${GITHUB_WORKSPACE}/output/ttyd
         chmod -R 777 ${GITHUB_WORKSPACE}/output
 
     - name: List output files
