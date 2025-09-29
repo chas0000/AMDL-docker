@@ -36,6 +36,8 @@ jobs:
 
     - name: Build apple-music-downloader (sky8282)
       run: |
+        mkdir -p ./sky
+        cd ${GITHUB_WORKSPACE}/sky
         git clone https://github.com/sky8282/apple-music-downloader.git
         cd ${GITHUB_WORKSPACE}/sky/apple-music-downloader
         sed -i 's|config.yaml|sky_config.yaml|g' ./main.go
