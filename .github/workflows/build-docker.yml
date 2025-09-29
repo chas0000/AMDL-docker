@@ -28,9 +28,7 @@ jobs:
       run: |
         git clone https://github.com/zhaarey/apple-music-downloader.git
         cd ${GITHUB_WORKSPACE}/apple-music-downloader
-        ls
-        sed -i '/^import (/,/^)/s|^import (|&\n\t"path/filepath"|' ./internal/core/state.go
-        sed -i 's|if configPath == "" {|&\n\t\t// 获取程序所在目录\n\t\texecutablePath, err := os.Executable()\n\t\tif err != nil {\n\t\t\treturn fmt.Errorf("获取程序路径失败: %v", err)\n\t\t}\n\t\tdir := filepath.Dir(executablePath)\n\t\tConfigPath = filepath.Join(dir, "config.yaml")|' ./internal/core/state.go
+        sed -i 's|os.ReadFile("config.yaml")|executablePath, err := os.Executable()\n\tif err != nil {\n\t\treturn fmt.Errorf("获取程序路径失败: %v", err)\n\t}\n\tdir := filepath.Dir(executablePath)\n\tconfigPath := filepath.Join(dir, "config.yaml")\n\tos.ReadFile(configPath)|' ./main.go
         CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o dl main.go
         mkdir -p ${GITHUB_WORKSPACE}/output/z_amdl
         mv dl ${GITHUB_WORKSPACE}/output/z_amdl
@@ -40,9 +38,7 @@ jobs:
       run: |
         git clone https://github.com/sky8282/apple-music-downloader.git
         cd ${GITHUB_WORKSPACE}/sky/apple-music-downloader
-        ls
-        sed -i '/^import (/,/^)/s|^import (|&\n\t"path/filepath"|' ./internal/core/state.go
-        sed -i 's|if configPath == "" {|&\n\t\t// 获取程序所在目录\n\t\texecutablePath, err := os.Executable()\n\t\tif err != nil {\n\t\t\treturn fmt.Errorf("获取程序路径失败: %v", err)\n\t\t}\n\t\tdir := filepath.Dir(executablePath)\n\t\tConfigPath = filepath.Join(dir, "config.yaml")|'./internal/core/state.go
+        sed -i 's|os.ReadFile("config.yaml")|executablePath, err := os.Executable()\n\tif err != nil {\n\t\treturn fmt.Errorf("获取程序路径失败: %v", err)\n\t}\n\tdir := filepath.Dir(executablePath)\n\tconfigPath := filepath.Join(dir, "config.yaml")\n\tos.ReadFile(configPath)|' ./main.go
         CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o sdl main.go
         mkdir -p ${GITHUB_WORKSPACE}/output/s_amdl
         mv sdl ${GITHUB_WORKSPACE}/output/s_amdl
