@@ -28,21 +28,21 @@ jobs:
       run: |
         git clone https://github.com/zhaarey/apple-music-downloader.git
         cd ${GITHUB_WORKSPACE}/apple-music-downloader
-        sed -i 's|os.ReadFile("config.yaml")|executablePath, err := os.Executable()\n\tif err != nil {\n\t\treturn fmt.Errorf("获取程序路径失败: %v", err)\n\t}\n\tdir := filepath.Dir(executablePath)\n\tconfigPath := filepath.Join(dir, "config.yaml")\n\tos.ReadFile(configPath)|' ./main.go
+        
         CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o dl main.go
-        mkdir -p ${GITHUB_WORKSPACE}/output/z_amdl
-        mv dl ${GITHUB_WORKSPACE}/output/z_amdl
-        mv config.yaml ${GITHUB_WORKSPACE}/output/z_amdl
+        mkdir -p ${GITHUB_WORKSPACE}/output
+        mv dl ${GITHUB_WORKSPACE}/output/
+        mv config.yaml ${GITHUB_WORKSPACE}/output/
 
     - name: Build apple-music-downloader (sky8282)
       run: |
         git clone https://github.com/sky8282/apple-music-downloader.git
         cd ${GITHUB_WORKSPACE}/sky/apple-music-downloader
-        sed -i 's|os.ReadFile("config.yaml")|executablePath, err := os.Executable()\n\tif err != nil {\n\t\treturn fmt.Errorf("获取程序路径失败: %v", err)\n\t}\n\tdir := filepath.Dir(executablePath)\n\tconfigPath := filepath.Join(dir, "config.yaml")\n\tos.ReadFile(configPath)|' ./main.go
+        sed -i 's|config.yaml|sky_config.yaml|g' ./main.go
         CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o sdl main.go
-        mkdir -p ${GITHUB_WORKSPACE}/output/s_amdl
-        mv sdl ${GITHUB_WORKSPACE}/output/s_amdl
-        mv config.yaml ${GITHUB_WORKSPACE}/output/s_amdl
+        mkdir -p ${GITHUB_WORKSPACE}/output/
+        mv sdl ${GITHUB_WORKSPACE}/output/
+        cp config.yaml ${GITHUB_WORKSPACE}/output/sky_config.yaml
 
     - name: Download ttyd
       run: |
@@ -82,10 +82,9 @@ jobs:
     - name: Move files    
       run: |
         ls -lR ${GITHUB_WORKSPACE}/output
-        mkdir -p ${GITHUB_WORKSPACE}/backup/z_amdl
-        mkdir -p ${GITHUB_WORKSPACE}/backup/s_amdl
-        mv ${GITHUB_WORKSPACE}/output/z_amdl/config.yaml ${GITHUB_WORKSPACE}/backup/z_amdl/config.yaml
-        mv ${GITHUB_WORKSPACE}/output/s_amdl/config.yaml ${GITHUB_WORKSPACE}/backup/s_amdl/config.yaml
+        mkdir -p ${GITHUB_WORKSPACE}/backup/
+        mv ${GITHUB_WORKSPACE}/output/config.yaml ${GITHUB_WORKSPACE}/backup/config.yaml
+        mv ${GITHUB_WORKSPACE}/output/sky_config.yaml ${GITHUB_WORKSPACE}/backup/sky_config.yaml
         ls -l ${GITHUB_WORKSPACE}/backup
         
 
