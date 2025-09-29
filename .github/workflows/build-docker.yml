@@ -41,6 +41,7 @@ jobs:
         git clone https://github.com/sky8282/apple-music-downloader.git
         cd ${GITHUB_WORKSPACE}/sky/apple-music-downloader
         sed -i 's|config.yaml|sky_config.yaml|g' ./main.go
+        sed -i 's|config.yaml|sky_config.yaml|g' ./internal/core/state.go
         CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o sdl main.go
         mkdir -p ${GITHUB_WORKSPACE}/output/
         mv sdl ${GITHUB_WORKSPACE}/output/
