@@ -14,46 +14,47 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Build inside Alpine container
+    - name: Set up Go
       run: |
-        docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace alpine:latest sh -c "
-          apk update && apk add --no-cache \
-            git \
-            make \
-            build-base \
-            wget \
-            curl \
-            bash \
-            zlib-dev \
-            ca-certificates && \
-          wget https://golang.org/dl/go1.23.9.linux-amd64.tar.gz && \
-          tar -C /usr/local -xvzf go1.23.9.linux-amd64.tar.gz && \
-          export PATH=\$PATH:/usr/local/go/bin && \
-          go version && \ 
-          cd /workspace  &&\
-          git clone https://github.com/zhaarey/apple-music-downloader.git &&  \
-          cd /workspace/apple-music-downloader &&  \
-          sed -i '/^import (/,/^)/s|^import (|&\n\t"path/filepath"|' /workspace/apple-music-downloader/internal/core/state.go &&  \
-          sed -i 's|if configPath == "" {|&\n\t\t// 获取程序所在目录\n\t\texecutablePath, err := os.Executable()\n\t\tif err != nil {\n\t\t\treturn fmt.Errorf("获取程序路径失败: %v", err)\n\t\t}\n\t\tdir := filepath.Dir(executablePath)\n\t\tConfigPath = filepath.Join(dir, "config.yaml")|' /workspace/apple-music-downloader/internal/core/state.go &&  \
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o dl main.go && \
-          mkdir -p /workspace/output/z_amdl &&  \
-          mv /workspace/apple-music-downloader/dl /workspace/output/z_amdl && \
-          mv /workspace/apple-music-downloader/config.yaml /workspace/output/z_amdl && \
-          mkdir -p /workspace/sky &&\
-          cd /workspace/sky  &&\ 
-          git clone https://github.com/sky8282/apple-music-downloader.git  &&  \
-          cd /workspace/sky/apple-music-downloader &&  \
-          sed -i '/^import (/,/^)/s|^import (|&\n\t"path/filepath"|' /workspace/sky/apple-music-downloader/internal/core/state.go &&  \
-          sed -i 's|if configPath == "" {|&\n\t\t// 获取程序所在目录\n\t\texecutablePath, err := os.Executable()\n\t\tif err != nil {\n\t\t\treturn fmt.Errorf("获取程序路径失败: %v", err)\n\t\t}\n\t\tdir := filepath.Dir(executablePath)\n\t\tConfigPath = filepath.Join(dir, "config.yaml")|' /workspace/sky/apple-music-downloader/internal/core/state.go &&  \
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o sdl main.go && \
-          mkdir -p /workspace/output/s_amdl &&  \
-          mv /workspace/sky/apple-music-downloader/sdl /workspace/output/s_amdl && \
-          mv /workspace/sky/apple-music-downloader/config.yaml /workspace/output/s_amdl && \
-          cd /workspace  &&\
-          wget \$(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url | grep 'ttyd.x86_64' | cut -d '\"' -f 4) && \
-          mv ttyd.x86_64 /workspace/output/ttyd && \
-          chmod -R 777 /workspace/output && \
-          ls -lR /workspace/output"
+        sudo apt-get update
+        sudo apt-get install -y wget curl git make build-essential bash zlib1g-dev ca-certificates
+        wget https://golang.org/dl/go1.23.9.linux-amd64.tar.gz
+        sudo tar -C /usr/local -xvzf go1.23.9.linux-amd64.tar.gz
+        echo "export PATH=\$PATH:/usr/local/go/bin" >> ~/.bashrc
+        source ~/.bashrc
+        go version
+
+    - name: Build apple-music-downloader (zhaarey)
+      run: |
+        git clone https://github.com/zhaarey/apple-music-downloader.git /workspace/apple-music-downloader
+        cd ${GITHUB_WORKSPACE}/apple-music-downloader
+        sed -i '/^import (/,/^)/s|^import (|&\n\t"path/filepath"|' internal/core/state.go
+        sed -i 's|if configPath == "" {|&\n\t\t// 获取程序所在目录\n\t\texecutablePath, err := os.Executable()\n\t\tif err != nil {\n\t\t\treturn fmt.Errorf("获取程序路径失败: %v", err)\n\t\t}\n\t\tdir := filepath.Dir(executablePath)\n\t\tConfigPath = filepath.Join(dir, "config.yaml")|' internal/core/state.go
+        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o dl main.go
+        mkdir -p ${GITHUB_WORKSPACE}/output/z_amdl
+        mv dl ${GITHUB_WORKSPACE}/output/z_amdl
+        mv config.yaml ${GITHUB_WORKSPACE}/output/z_amdl
+
+    - name: Build apple-music-downloader (sky8282)
+      run: |
+        git clone https://github.com/sky8282/apple-music-downloader.git /workspace/sky/apple-music-downloader
+        cd ${GITHUB_WORKSPACE}/sky/apple-music-downloader
+        sed -i '/^import (/,/^)/s|^import (|&\n\t"path/filepath"|' internal/core/state.go
+        sed -i 's|if configPath == "" {|&\n\t\t// 获取程序所在目录\n\t\texecutablePath, err := os.Executable()\n\t\tif err != nil {\n\t\t\treturn fmt.Errorf("获取程序路径失败: %v", err)\n\t\t}\n\t\tdir := filepath.Dir(executablePath)\n\t\tConfigPath = filepath.Join(dir, "config.yaml")|' internal/core/state.go
+        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o sdl main.go
+        mkdir -p ${GITHUB_WORKSPACE}/output/s_amdl
+        mv sdl ${GITHUB_WORKSPACE}/output/s_amdl
+        mv config.yaml ${GITHUB_WORKSPACE}/output/s_amdl
+
+    - name: Download ttyd
+      run: |
+        wget $(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url | grep 'ttyd.x86_64' | cut -d '\"' -f 4)
+        mv ttyd.x86_64 ${GITHUB_WORKSPACE}/output/ttyd
+        chmod -R 777 ${GITHUB_WORKSPACE}/output
+
+    - name: List output files
+      run: |
+        ls -lR ${GITHUB_WORKSPACE}/output
 
     - name: Upload AMDL artifacts
       uses: actions/upload-artifact@v4
