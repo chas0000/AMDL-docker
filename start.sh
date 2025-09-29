@@ -2,15 +2,15 @@
 set -e
 echo "尝试启动"
 # 1. 检查 /app/amdl/config.yaml 是否存在
-if [ ! -f /app/config/z_amdl/config.yaml ]; then
-    cp /app/backup/z_amdl/config.yaml /app/z_amdl/config.yaml
+if [ ! -f /app/config/config.yaml ]; then
+    cp /app/backup/config.yaml /app/config.yaml
 else
-    cp /app/config/z_amdl/config.yaml /app/z_amdl/config.yaml   
+    cp /app/config/config.yaml /app/config.yaml   
 fi
-if [ ! -f /app/config/s_amdl/config.yaml ]; then
-    cp /app/backup/s_amdl/config.yaml /app/s_amdl/config.yaml
+if [ ! -f /app/config/sky_config.yaml ]; then
+    cp /app/backup/sky_config.yaml /app/sky_config.yaml
 else
-    cp /app/config/s_amdl/config.yaml /app/s_amdl/config.yaml     
+    cp /app/config/sky_config.yaml /app/sky_config.yaml  
 fi
 
 export TERM=xterm-256color
