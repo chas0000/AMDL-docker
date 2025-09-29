@@ -48,7 +48,8 @@ jobs:
 
     - name: Download ttyd
       run: |
-        wget $(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url | grep 'ttyd.x86_64' | cut -d '\"' -f 4)
+        apt update && apt install wget curl -y
+        wget $(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url | grep 'ttyd.x86_64' | cut -d '"' -f 4)
         cp ttyd.x86_64 ${GITHUB_WORKSPACE}/output/ttyd
         chmod -R 777 ${GITHUB_WORKSPACE}/output
 
