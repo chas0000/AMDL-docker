@@ -2,26 +2,29 @@ services:
   wrapper:
     container_name: wrapper
     image: ghcr.io/itouakirai/wrapper:x86
-    networks:
-      - amdl
-    ports:
-      - "10020:10020"
-      - "20020:20020"
+    #networks:
+    #  - amdl
+    network_mode: host 
+    #ports:
+    #  - "10020:10020"
+    #  - "20020:20020"
     volumes:
       - ./rootfs:/app/rootfs                    #wrapper需要的rootfs目录，2FA也在此目录，默认不需改动； 如果需要多个wrapper 就做多个映射，当然删掉这段单独在外面跑wrapper也是可以
     restart: unless-stopped
   amdl:
     container_name: amdl
     image:  ghcr.io/chas0000/amdl-docker:latest
-    networks:
-      - amdl
-    ports:
-      - "7681:7681"
+    #networks:
+    #  - amdl
+    network_mode: host   
+    #ports:
+    #  - "7681:7681"
     volumes:
      - /mnt/disk1:/mnt/disk1  #映射需要保持音乐的目录，后半段与config.yaml中一致，不需改动，只需改前面路径 
      - ./config/:/app/config/   #amdl的config文件，运行时不需改动路径，后续修改config修改此处即可；
 
-networks:
-  amdl:
-    driver: bridge
+#networks:
+#  amdl:
+#    driver: bridge   
+
 
