@@ -26,7 +26,7 @@ jobs:
 
     - name: Build apple-music-downloader (zhaarey)
       run: |
-        git clone https://github.com/zhaarey/apple-music-downloader.git  ${GITHUB_WORKSPACE}/apple-music-downloader
+        git clone https://github.com/zhaarey/apple-music-downloader.git
         cd ${GITHUB_WORKSPACE}/apple-music-downloader
         sed -i '/^import (/,/^)/s|^import (|&\n\t"path/filepath"|' ${GITHUB_WORKSPACE}/apple-music-downloader/internal/core/state.go
         sed -i 's|if configPath == "" {|&\n\t\t// 获取程序所在目录\n\t\texecutablePath, err := os.Executable()\n\t\tif err != nil {\n\t\t\treturn fmt.Errorf("获取程序路径失败: %v", err)\n\t\t}\n\t\tdir := filepath.Dir(executablePath)\n\t\tConfigPath = filepath.Join(dir, "config.yaml")|' ${GITHUB_WORKSPACE}/apple-music-downloader/internal/core/state.go
@@ -37,7 +37,7 @@ jobs:
 
     - name: Build apple-music-downloader (sky8282)
       run: |
-        git clone https://github.com/sky8282/apple-music-downloader.git  ${GITHUB_WORKSPACE}/sky/apple-music-downloader
+        git clone https://github.com/sky8282/apple-music-downloader.git
         cd ${GITHUB_WORKSPACE}/sky/apple-music-downloader
         sed -i '/^import (/,/^)/s|^import (|&\n\t"path/filepath"|' ${GITHUB_WORKSPACE}/sky/apple-music-downloaderinternal/core/state.go
         sed -i 's|if configPath == "" {|&\n\t\t// 获取程序所在目录\n\t\texecutablePath, err := os.Executable()\n\t\tif err != nil {\n\t\t\treturn fmt.Errorf("获取程序路径失败: %v", err)\n\t\t}\n\t\tdir := filepath.Dir(executablePath)\n\t\tConfigPath = filepath.Join(dir, "config.yaml")|' ${GITHUB_WORKSPACE}/sky/apple-music-downloader/internal/core/state.go
