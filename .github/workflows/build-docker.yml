@@ -12,7 +12,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Set up Go
       run: |
@@ -29,10 +29,14 @@ jobs:
         git clone https://github.com/zhaarey/apple-music-downloader.git
         cd ${GITHUB_WORKSPACE}/apple-music-downloader
         
-        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o dl main.go
+        # 同时编译 amd64 与 arm64
         mkdir -p ${GITHUB_WORKSPACE}/output
-        mv dl ${GITHUB_WORKSPACE}/output/
-        mv config.yaml ${GITHUB_WORKSPACE}/output/
+        for ARCH in amd64 arm64; do
+          echo "==> Building for $ARCH"
+          CGO_ENABLED=0 GOOS=linux GOARCH=$ARCH go build -a -o dl-$ARCH main.go
+          mv dl-$ARCH ${GITHUB_WORKSPACE}/output/
+        done
+        cp config.yaml ${GITHUB_WORKSPACE}/output/
 
     - name: Build apple-music-downloader (sky8282)
       run: |
@@ -42,17 +46,26 @@ jobs:
         cd ${GITHUB_WORKSPACE}/sky/apple-music-downloader
         sed -i 's|config.yaml|sky_config.yaml|g' ./main.go
         sed -i 's|config.yaml|sky_config.yaml|g' ./internal/core/state.go
-        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o sdl main.go
+
         mkdir -p ${GITHUB_WORKSPACE}/output/
-        mv sdl ${GITHUB_WORKSPACE}/output/
+        for ARCH in amd64 arm64; do
+          echo "==> Building sky version for $ARCH"
+          CGO_ENABLED=0 GOOS=linux GOARCH=$ARCH go build -a -o sdl-$ARCH main.go
+          mv sdl-$ARCH ${GITHUB_WORKSPACE}/output/
+        done
         cp config.yaml ${GITHUB_WORKSPACE}/output/sky_config.yaml
 
-    - name: Download ttyd
+    - name: Download ttyd (multi-arch)
       run: |
         apt update && apt install wget curl -y
-        wget $(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url | grep 'ttyd.x86_64' | cut -d '"' -f 4)
-        cp ttyd.x86_64 ${GITHUB_WORKSPACE}/output/ttyd
-        chmod -R 777 ${GITHUB_WORKSPACE}/output
+        mkdir -p ${GITHUB_WORKSPACE}/output
+        for ARCH in amd64 arm64; do
+          if [ "$ARCH" = "amd64" ]; then DLARCH="x86_64"; else DLARCH="aarch64"; fi
+          echo "==> Downloading ttyd for $ARCH ($DLARCH)"
+          URL=$(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url | grep "$DLARCH" | cut -d '"' -f 4 | head -n 1)
+          wget "$URL" -O ${GITHUB_WORKSPACE}/output/ttyd-$ARCH
+          chmod +x ${GITHUB_WORKSPACE}/output/ttyd-$ARCH
+        done
 
     - name: List output files
       run: |
@@ -71,7 +84,7 @@ jobs:
         git clone https://github.com/gpac/gpac.git gpac_public
         cd gpac_public
         ./configure --static-bin
-        make
+        make -j$(nproc)
         ls -l ./bin/gcc
         mv ./bin/gcc/MP4Box ${GITHUB_WORKSPACE}
         ls -l ${GITHUB_WORKSPACE}
@@ -90,11 +103,8 @@ jobs:
         mv ${GITHUB_WORKSPACE}/output/config.yaml ${GITHUB_WORKSPACE}/backup/config.yaml
         mv ${GITHUB_WORKSPACE}/output/sky_config.yaml ${GITHUB_WORKSPACE}/backup/sky_config.yaml
         ls -l ${GITHUB_WORKSPACE}/backup
-        
 
     - name: Set up QEMU
-      # QEMU 是用于在一种架构上模拟另一种架构的工具  
-      # Docker BuildKit 使用 QEMU 来实现跨平台构建  
       uses: docker/setup-qemu-action@v2
 
     - name: Set up Docker Buildx
@@ -113,20 +123,17 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    # 设置环境变量以包含时间戳  
     - name: Get current date
-      run: export TZ='Asia/Shanghai'&& echo "BUILD_DATE=$(date +'%Y%m%d%H%M')" >> $GITHUB_ENV
+      run: export TZ='Asia/Shanghai' && echo "BUILD_DATE=$(date +'%Y%m%d%H%M')" >> $GITHUB_ENV
 
-    # 构建并推送 Docker 镜像  
-    - name: Build and push Docker images
-      uses: docker/build-push-action@v3
+    - name: Build and push Docker images (multi-arch)
+      uses: docker/build-push-action@v5
       with:
         context: .
-        platforms: linux/amd64
+        platforms: linux/amd64,linux/arm64
         push: true
         tags: |
           ${{ secrets.DOCKER_USERNAME }}/amdl-docker:latest
           ${{ secrets.DOCKER_USERNAME }}/amdl-docker:${{ env.BUILD_DATE }}
           ghcr.io/${{ github.repository_owner }}/amdl-docker:latest
           ghcr.io/${{ github.repository_owner }}/amdl-docker:${{ env.BUILD_DATE }}
-  
