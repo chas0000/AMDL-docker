@@ -15,7 +15,8 @@
 - 2、建立项目compose目录，例如：  
   - /docker/wrapper-amdl/  
               ├── config/  
-              ├── rootfs/  
+              ├── rootfs/
+                    └── data/  
               └── docker-compose.yml
     
     config放置两个配置文件 config.yaml为zhaarey佬原版，对应dl命令使用；sky_config.yaml为sky8282佬多线程版，对应sdl使用。
@@ -33,7 +34,7 @@
     预备，123456修改为2FA验证码，获取后回车确定即可，若无2FA，则跳过此步；  
   - 3.2.1 运行
     
-    `docker run -v ./rootfs:/app/rootfs -v ./amdl:/app/amdl -e args="-L username:password -F" --rm ghcr.io/itouakirai/wrapper:x86`
+    `docker run -v ./rootfs/data:/app/rootfs/data -e args="-L username:password -F" --rm ghcr.io/itouakirai/wrapper:x86`
     
      username和password替换为自己id；正常情况下会自动拉取镜像，如果没有自动拉取镜像，可以用
     
