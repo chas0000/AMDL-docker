@@ -14,10 +14,10 @@
 - 1、建议使用compose方式管理，cli方式也可以，但是需要自己管理路径，以下说明均安装compose方式；  
 - 2、建立项目compose目录，例如：  
 /docker/wrapper-amdl/  
-     ├── config/  
-     ├── rootfs/  
-        └── data/  
-     └── docker-compose.yml  
+```    ```├── config/  
+```    ```├── rootfs/  
+```        ```└── data/  
+```    ```└── docker-compose.yml  
     
     config放置两个配置文件 config.yaml为zhaarey佬原版，对应dl命令使用；sky_config.yaml为sky8282佬多线程版，对应sdl使用。
     
