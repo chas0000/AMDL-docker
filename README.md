@@ -15,7 +15,7 @@
 - 2、建立项目compose目录，例如：  
   - /docker/wrapper-amdl/  
               ├── config/  
-              ├── rootfs/
+              ├── rootfs/  
                     └── data/  
               └── docker-compose.yml
     
