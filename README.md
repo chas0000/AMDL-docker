@@ -39,7 +39,7 @@
   - 3.2.1 运行
     ```shell**
     docker run -v ./rootfs/data:/app/rootfs/data -e args="-L username:password -F" --rm ghcr.io/itouakirai/wrapper:x86
-    
+    ```
      username和password替换为自己id；正常情况下会自动拉取镜像，如果没有自动拉取镜像，可以用
     
     `ghcr.io/itouakirai/wrapper:x86`  ；arm用户请自己替换为 `ghcr.io/itouakirai/wrapper:arm`
