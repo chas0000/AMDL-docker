@@ -13,21 +13,18 @@
 使用简易说明：  
 - 1、建议使用compose方式管理，cli方式也可以，但是需要自己管理路径，以下说明均安装compose方式；  
 - 2、建立项目compose目录，例如：
-<pre>  
+<pre>
 /docker/wrapper-amdl/  
     ├── config/  
     ├── rootfs/  
         └── data/  
     └── docker-compose.yml  
-</pre>
-</div>  
+</pre></div>  
 
 <pre>
-    config放置两个配置文件 config.yaml为zhaarey佬原版，对应dl命令使用；sky_config.yaml为sky8282佬多线程版，对应sdl使用。
-    
-    注意：sky8282佬多线程版需要根据自己实际网络情况配置分片和线程数，这里不提供教程，因为我也不会，我就是瞎试一个不崩的参数就一直用。
-    
-    注意：使用sky8282佬多线程版时关闭ffmpeg修复，因为没有内置ffmpeg，需要该功能的建议本机直接跑而不是用容器，ffmpeg用的地方太多了，容器内置一个的话属于浪费空间。
+config放置两个配置文件 config.yaml为zhaarey佬原版，对应dl命令使用；sky_config.yaml为sky8282佬多线程版，对应sdl使用。
+注意：sky8282佬多线程版需要根据自己实际网络情况配置分片和线程数，这里不提供教程，因为我也不会，我就是瞎试一个不崩的参数就一直用。
+注意：使用sky8282佬多线程版时关闭ffmpeg修复，因为没有内置ffmpeg，需要该功能的建议本机直接跑而不是用容器，ffmpeg用的地方太多了，容器内置一个的话属于浪费空间。
 </pre>
 </div>
 
