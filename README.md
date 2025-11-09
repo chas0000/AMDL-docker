@@ -38,7 +38,7 @@
     
      username和password替换为自己id；正常情况下会自动拉取镜像，如果没有自动拉取镜像，可以用
     
-    `ghcr.io/itouakirai/wrapper:x86`
+    `ghcr.io/itouakirai/wrapper:x86`  ；arm用户请自己替换为 `ghcr.io/itouakirai/wrapper:arm`
     
     拉取。运行后会显示wrapper的登录情况，如有2FA，按3.2.0操作，登录成功后ctrl+c退出即可；如果有容器残留，记得自己手动删除。  
   - 3.2.2 运行docker compose up -d正常运行容器，cli命令也可但是注意修改路径映射
