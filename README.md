@@ -31,11 +31,10 @@
  
 - 3、第一次wrapper登录，参照原方式：  
   - 3.1 cd /docker/wrapper-amdl 进入compose所在目录；  
-  - 3.2.0 如果有2FA，需要新开一个ssh窗口，cd /docker/wrapper-amdl 后输入
-   ```shell**
-   echo -n 123456 > ./rootfs/data/2fa.txt
-   ```    
-    预备，123456修改为2FA验证码，获取后回车确定即可，若无2FA，则跳过此步；  
+  - 3.2.0 如果有2FA，需要新开一个ssh窗口，cd /docker/wrapper-amdl 后输入以下命令预备，123456修改为2FA验证码，获取后回车确定即可，若无2FA，则跳过此步；  
+    ```shell**
+    echo -n 123456 > ./rootfs/data/2fa.txt
+    ``` 
   - 3.2.1 运行
     ```shell**
     docker run -v ./rootfs/data:/app/rootfs/data -e args="-L username:password -F" --rm ghcr.io/itouakirai/wrapper:x86
