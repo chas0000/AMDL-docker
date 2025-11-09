@@ -13,7 +13,7 @@
 使用简易说明：  
 - 1、建议使用compose方式管理，cli方式也可以，但是需要自己管理路径，以下说明均安装compose方式；  
 - 2、建立项目compose目录，例如：  
-/docker/wrapper-amdl/
+/docker/wrapper-amdl/  
      ├── config/  
      ├── rootfs/  
      │ └── data/  
