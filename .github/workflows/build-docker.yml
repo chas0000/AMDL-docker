@@ -46,7 +46,7 @@ jobs:
         cd ${GITHUB_WORKSPACE}/sky/apple-music-downloader
         sed -i 's|config.yaml|sky_config.yaml|g' ./main.go
         sed -i 's|config.yaml|sky_config.yaml|g' ./internal/core/state.go
-
+        go mod tidy
         mkdir -p ${GITHUB_WORKSPACE}/output/
         for ARCH in amd64 arm64; do
           echo "==> Building sky version for $ARCH"
