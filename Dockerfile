@@ -6,7 +6,7 @@ ARG TARGETARCH
 # 安装基础依赖与中文支持
 RUN apk update && \
     apk add --no-cache \
-      bash screen nano wget ca-certificates ttf-dejavu && \
+      bash screen nano wget ffmpeg ca-certificates ttf-dejavu && \
     rm -rf /var/cache/apk/*
 
 # 设置中文环境
