@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -24,6 +25,9 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
+// 匹配百分比行
+var progressRe = regexp.MustCompile(`\d+%`)
+
 type Session struct {
 	conn    *websocket.Conn
 	stdinCh chan string
@@ -32,7 +36,7 @@ type Session struct {
 	writeMu sync.Mutex
 }
 
-// 写日志并轮转，添加完整时间戳
+// 写日志并轮转
 func writeLog(line string) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	lineWithTime := fmt.Sprintf("[%s] %s", timestamp, line)
@@ -51,13 +55,12 @@ func writeLog(line string) {
 	}
 }
 
-// 日志轮转，保留最多 MaxLogFiles 个
+// 日志轮转
 func rotateLogs() {
 	oldest := fmt.Sprintf("%s.%d", LogFile, MaxLogFiles)
 	if _, err := os.Stat(oldest); err == nil {
 		os.Remove(oldest)
 	}
-
 	for i := MaxLogFiles - 1; i >= 1; i-- {
 		src := fmt.Sprintf("%s.%d", LogFile, i)
 		dst := fmt.Sprintf("%s.%d", LogFile, i+1)
@@ -65,7 +68,6 @@ func rotateLogs() {
 			os.Rename(src, dst)
 		}
 	}
-
 	os.Rename(LogFile, LogFile+".1")
 	os.Create(LogFile)
 	fmt.Println("Log rotated")
@@ -110,7 +112,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		writeWS(session, line)
 	}
 
-	// 接收消息
+	// 接收命令
 	go func() {
 		for {
 			_, data, err := conn.ReadMessage()
@@ -122,7 +124,12 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			if cmd == "" {
 				continue
 			}
-			// 不再判断前缀，所有输入都调用 execInteractive
+
+			// 显示用户输入命令
+			writeWS(session, fmt.Sprintf("[CMD] %s", cmd))
+			writeLog(fmt.Sprintf("[CMD] %s", cmd))
+
+			// 执行命令
 			go execInteractive(session, cmd)
 		}
 	}()
@@ -131,14 +138,13 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("WS disconnected:", r.RemoteAddr)
 }
 
-// 使用 bash -c 执行命令，支持管道、变量、重定向
+// 执行交互式命令
 func execInteractive(session *Session, args string) {
 	if args == "" {
 		return
 	}
 
 	cmd := exec.Command("bash", "-c", args)
-
 	stdout, _ := cmd.StdoutPipe()
 	stderr, _ := cmd.StderrPipe()
 	stdin, _ := cmd.StdinPipe()
@@ -152,16 +158,14 @@ func execInteractive(session *Session, args string) {
 	session.wg.Add(1)
 	go func() {
 		defer session.wg.Done()
-		readPipeInteractive(stdout, session, "[stdout]")
+		readPipe(stdout, session, "[stdout]")
 	}()
-
 	// stderr
 	session.wg.Add(1)
 	go func() {
 		defer session.wg.Done()
-		readPipeInteractive(stderr, session, "[stderr]")
+		readPipe(stderr, session, "[stderr]")
 	}()
-
 	// stdin
 	session.wg.Add(1)
 	go func() {
@@ -181,18 +185,25 @@ func execInteractive(session *Session, args string) {
 	session.wg.Wait()
 }
 
-func readPipeInteractive(pipe io.ReadCloser, session *Session, prefix string) {
+// 读取 pipe，过滤百分比进度行
+func readPipe(pipe io.ReadCloser, session *Session, prefix string) {
 	r := bufio.NewReader(pipe)
+
 	for {
 		line, err := r.ReadString('\n')
 		if len(line) > 0 {
-			line = strings.TrimRight(line, "\r\n")
+			line = strings.TrimRight(line, "\r\n ")
 
-			timestamp := time.Now().Format("15:04:05")
-			lineWithTime := fmt.Sprintf("[%s] %s %s", timestamp, prefix, line)
-
+			// 日志写完整
 			writeLog(fmt.Sprintf("%s %s", prefix, line))
-			writeWS(session, lineWithTime)
+
+			// 过滤百分比行
+			if progressRe.MatchString(line) {
+				continue
+			}
+
+			// 发送普通输出到 Web
+			writeWS(session, fmt.Sprintf("[%s] %s %s", time.Now().Format("15:04:05"), prefix, line))
 		}
 		if err != nil {
 			return
@@ -211,9 +222,6 @@ func page(w http.ResponseWriter, r *http.Request) {
 <style>
 body { font-family: monospace, "Courier New", sans-serif; background:#111; color:#0f0; margin:0; padding:0; display:flex; flex-direction:column; height:100vh;}
 #log { white-space: pre-wrap; flex:1; overflow-y:auto; padding:10px; background:#111; scrollbar-width: thin; scrollbar-color: #0f0 #222;}
-#log::-webkit-scrollbar { width: 8px; }
-#log::-webkit-scrollbar-track { background: #222; }
-#log::-webkit-scrollbar-thumb { background-color: #0f0; border-radius: 4px; }
 #inputBar { display:flex; flex-direction:column; padding:5px; background:#222; }
 #cmd { flex:1; padding:5px; font-size:16px; font-family: monospace, "Courier New", sans-serif; color:#0f0; background:#111; border:1px solid #0f0; width:100%; resize:none; height:80px; border-radius:5px; }
 button { padding:5px 10px; font-size:16px; margin-top:5px; color:#0f0; background:#222; border:1px solid #0f0; cursor:pointer; width:100%; border-radius:5px; }
@@ -224,21 +232,20 @@ button:active { background:#0a0; }
 
 <div id="log"></div>
 <div id="inputBar">
-<textarea id="cmd" placeholder="输入命令或交互输入，多行输入每行自动回车"></textarea>
+<textarea id="cmd" placeholder="输入命令，多行每行回车"></textarea>
 <button onclick="sendCmd()">Send</button>
 </div>
 
 <script>
 let ws = new WebSocket("ws://" + location.host + "/ws");
-ws.onopen = () => console.log("WS connected");
-ws.onerror = e => console.log("WS error", e);
-ws.onclose = () => console.log("WS closed");
+let logContainer = document.getElementById("log");
 
 ws.onmessage = e => {
-    let log = document.getElementById("log");
-    let text = e.data.replace(/\033\[[0-9;]*m/g,"");
-    log.innerText += text + "\n";
-    log.scrollTop = log.scrollHeight;
+    let line = e.data;
+    let div = document.createElement("div");
+    div.textContent = line;
+    logContainer.appendChild(div);
+    logContainer.scrollTop = logContainer.scrollHeight;
 };
 
 function sendCmd() {
