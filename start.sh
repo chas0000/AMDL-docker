@@ -1,25 +1,46 @@
-#!/bin/bash
+#!/bin/sh
 set -e
-echo "尝试启动"
-# 1. 检查 /app/amdl/config.yaml 是否存在
-if [ ! -f /app/config/config.yaml ]; then
-    cp /app/backup/config.yaml /app/config.yaml
-    cp /app/backup/config.yaml /app/config/config.yaml
-else
-    cp /app/config/config.yaml /app/config.yaml   
-fi
-if [ ! -f /app/config/sky_config.yaml ]; then
-    cp /app/backup/sky_config.yaml /app/sky_config.yaml
-    cp /app/backup/sky_config.yaml /app/config/sky_config.yaml
-else
-    cp /app/config/sky_config.yaml /app/sky_config.yaml  
-fi
 
-export TERM=xterm-256color
-export LANG=zh_CN.UTF-8
-# 后台运行 ttyd
-#ttyd -W  screen -xR mysession bash &
-#ttyd -W  bash &
-#ttyd -W  screen -xR mysession &
-#ttyd -W tmux new -A -s mysession &
-exit 0
+echo "[INFO] Starting application..."
+
+# ===============================
+# 1. 检查并复制配置文件（无覆盖逻辑错误）
+# ===============================
+
+copy_if_missing() {
+    src="$1"
+    dest="$2"
+    if [ ! -f "$dest" ]; then
+        echo "[INFO] 初始化配置: $dest"
+        cp "$src" "$dest"
+    fi
+}
+
+# 统一确保 config 目录存在
+mkdir -p /app/config
+
+# 配置文件：amdl 原版
+copy_if_missing /app/backup/config.yaml /app/config/config.yaml
+copy_if_missing /app/backup/config.yaml /app/config.yaml
+
+# 配置文件：sky 版本
+copy_if_missing /app/backup/sky_config.yaml /app/config/sky_config.yaml
+copy_if_missing /app/backup/sky_config.yaml /app/sky_config.yaml
+
+# ===============================
+# 2. 启动后台服务
+# ===============================
+
+cd /app/wrapper
+./wm_server &
+
+cd /app
+./shell_web &
+
+echo "[INFO] All services started."
+
+# ===============================
+# 3. 等待并正确退出
+# ===============================
+wait -n     # 任一进程退出就退出容器
+exit $?
