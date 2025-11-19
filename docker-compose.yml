@@ -6,11 +6,12 @@ services:
   
     # 如果不使用 host 模式，可以使用端口映射
     ports:
-       - "8880:8080"
+       - "8080:8080"
        - "18888:18888"
     volumes:
       - /mnt/disk1:/mnt/disk1        #映射需要保持音乐的目录，后半段需与config.toml中一致，自己修改
       - ./config/:/app/config/      #amdl的config存放位置，第一次运行时会自动拷贝备份
+
 
 
 
