@@ -125,11 +125,11 @@ jobs:
           BUILD_DATE_ARM64=${{ needs.build-arm64.outputs.build_date }}
 
           # Docker Hub
-          docker buildx imagetools create -t ${{ secrets.DOCKER_USERNAME }}/amdv2:latest \
+          docker buildx imagetools create -t ${{ secrets.DOCKER_USERNAME }}/amdl_m:latest \
             ${{ secrets.DOCKER_USERNAME }}/amdl_m:amd64-${BUILD_DATE_AMD64} \
             ${{ secrets.DOCKER_USERNAME }}/amdl_m:arm64-${BUILD_DATE_ARM64}
 
           # GHCR
-          docker buildx imagetools create -t ghcr.io/${{ github.actor }}/amdv2:latest \
+          docker buildx imagetools create -t ghcr.io/${{ github.actor }}/amdl_m:latest \
             ghcr.io/${{ github.actor }}/amdl_m:amd64-${BUILD_DATE_AMD64} \
             ghcr.io/${{ github.actor }}/amdl_m:arm64-${BUILD_DATE_ARM64}
