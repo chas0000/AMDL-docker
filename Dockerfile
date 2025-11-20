@@ -106,7 +106,7 @@ RUN set -eux; \
     if [ "$ARCH" = "amd64" ]; then \
         WRAPPER_URL="https://github.com/zhaarey/wrapper/releases/download/linux.V2/wrapper.x86_64.tar.gz"; \
     elif [ "$ARCH" = "arm64" ]; then \
-        WRAPPER_URL="https://github.com/zhaarey/wrapper/releases/download/linux.V2/wrapper.arm64.tar.gz"; \
+        WRAPPER_URL="https://github.com/zhaarey/wrapper/releases/download/arm64/wrapper.arm64.tar.gz"; \
     else \
         echo "Unsupported architecture: $ARCH" && exit 1; \
     fi; \
