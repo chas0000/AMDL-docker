@@ -25,7 +25,7 @@ fi
 # 2. 启动后台服务
 # ===============================
 cd /app/wrapper
-./wm_server &
+./wm_server --config /app/config/manager.json &
 
 cd /app
 ./shell_web &
