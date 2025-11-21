@@ -3,7 +3,7 @@
 加入了sky佬的wrapper管理网页<https://github.com/sky8282/wrapper-manager-v1> ，以前的登录不再需要;
 写了一个简单的下载web来调用命令，不再使用ttyd和screen或其他窗口管理；
 
-由于二开项目越来越多，所以又改了一般，将wrapper排除，转为直接使用itouakirai大佬的，然后制作了amdl的编译，同时做了sky8282佬的多线程的编译
+~~由于二开项目越来越多，所以又改了一版，将wrapper排除，转为直接使用itouakirai大佬的~~，然后制作了amdl的编译，同时做了sky8282佬的多线程的编译
 攒来自用的一个docker镜像，只适用于内网x86软路由，对于外网使用的，推荐<https://github.com/akina-up/wrapper-amdl>  
 说明：  
 - 镜像基底：alpine:latest  
