@@ -1,5 +1,5 @@
 services:
-  amdv2:
+  amdl_m:
     container_name: amdl
     image: chaslllll/amdl_m:latest  #或ghcr.io/chas0000/amdl_m:latest
     network_mode: bridge
@@ -12,6 +12,7 @@ services:
       - /mnt/disk1:/mnt/disk1        #映射需要保持音乐的目录，后半段需与config.toml中一致，自己修改
       - ./config/:/app/config/      #amdl的config存放位置，第一次运行时会自动拷贝备份
       - ./instances/:/app/wrapper/instances  #各区wrapper保存位置
+
 
 
 
