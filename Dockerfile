@@ -25,7 +25,7 @@ RUN git clone https://github.com/zhaarey/apple-music-downloader.git \
 # -------------------------
 WORKDIR /build
 RUN mkdir -p ./sky
-RUN git clone https://github.com/sky8282/apple-music-downloader.git ./sky/apple-music-downloader
+RUN git clone --depth=1 https://github.com/sky8282/apple-music-downloader.git ./sky/apple-music-downloader
 WORKDIR /build/sky/apple-music-downloader
 RUN sed -i 's|config.yaml|sky_config.yaml|g' ./main.go \
     && sed -i 's|config.yaml|sky_config.yaml|g' ./internal/core/state.go    
