@@ -20,6 +20,7 @@
 <pre>
 /docker/wrapper-amdl/  
     ├── config/  
+    ├── instances/  
     └── docker-compose.yml  
 
 </pre></div>  
