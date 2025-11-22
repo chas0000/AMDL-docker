@@ -25,13 +25,9 @@ fi
 # 2. 启动后台服务
 # ===============================
 # 启动 tmux 会话（如果尚未启动），将 `webterm` 作为会话名
-tmux has-session -t webterm 2>/dev/null
-if [ $? != 0 ]; then
-    tmux new-session -d -s webterm  # -d 表示后台启动
-    echo "[INFO] tmux session 'webterm' started."
-else
-    echo "[INFO] tmux session 'webterm' already running."
-fi
+
+tmux new-session -d -s webterm  # -d 表示后台启动
+    
 cd /app/wrapper
 ./wm_server --config /app/config/manager.json &
 
