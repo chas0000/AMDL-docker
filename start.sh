@@ -20,6 +20,8 @@ if [ ! -f /app/config/sky_config.yaml ]; then
 else
     cp /app/config/sky_config.yaml /app/sky_config.yaml  
 fi
+cd /app/wrapper
+./wm_server --config /app/config/manager.json &
 
 # -----------------------------
 #  设置 tmux socket 目录
@@ -61,8 +63,6 @@ else
     exec ttyd -W env LANG=zh_CN.UTF-8 LC_ALL=zh_CN.UTF-8 $TTYD_CMD
 fi
     
-cd /app/wrapper
-./wm_server --config /app/config/manager.json &
 
 
 echo "[INFO] All services started."
