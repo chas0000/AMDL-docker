@@ -37,6 +37,7 @@ RUN CGO_ENABLED=0 GOOS=linux  go build -a -o sdl main.go \
 # -------------------------
 # 3. 构建 wrapper-manager-v1
 # -------------------------
+WORKDIR /build
 RUN git clone https://github.com/sky8282/wrapper-manager-v1.git \
     && cd wrapper-manager-v1 \
     && go mod init wrapper-manager \
@@ -45,7 +46,7 @@ RUN git clone https://github.com/sky8282/wrapper-manager-v1.git \
     && cp wm_server /build/wrapper/wm_server \
     && cp index.html /build/wrapper/index.html
 
-
+WORKDIR /build
 RUN set -eux; \
     ARCH=$(dpkg --print-architecture); \
     case "$ARCH" in \
@@ -53,7 +54,7 @@ RUN set -eux; \
         arm64)  FILE="ttyd.aarch64" ;; \
         *) echo "Unsupported architecture: $ARCH" && exit 1 ;; \
     esac; \
-    wget -O /build/ttyd "https://github.com/tsl0922/ttyd/releases/latest/download/$FILE"; \
+    wget -O /build/ttyd "https://github.com/tsl0922/ttyd/releases/latest/download/$FILE"
 
 
 # =========================
