@@ -45,31 +45,12 @@ RUN git clone https://github.com/sky8282/wrapper-manager-v1.git \
     && cp wm_server /build/wrapper/wm_server \
     && cp index.html /build/wrapper/index.html
 
-# -------------------------
-# 4. 构建 shell_web
-# -------------------------
-# 假设 shell_web.go 已经在上下文里 COPY 进 /build
-COPY shell_web.go /build/shell_web.go
-RUN mkdir /build/shell_web \
-    && cp /build/shell_web.go /build/shell_web/shell_web.go \
-    && cd /build/shell_web \
-    && go mod init shell_web \
-    && go mod tidy \
-    && go build -a -o shell_web shell_web.go
 
 RUN set -eux; \
     ARCH=$(dpkg --print-architecture); \
     case "$ARCH" in \
         amd64)  FILE="ttyd.x86_64" ;; \
         arm64)  FILE="ttyd.aarch64" ;; \
-        armhf)  FILE="ttyd.armhf" ;; \
-        arm)    FILE="ttyd.arm" ;; \
-        i386|i686) FILE="ttyd.i686" ;; \
-        mips)   FILE="ttyd.mips" ;; \
-        mips64) FILE="ttyd.mips64" ;; \
-        mips64el) FILE="ttyd.mips64el" ;; \
-        mipsel) FILE="ttyd.mipsel" ;; \
-        s390x)  FILE="ttyd.s390x" ;; \
         *) echo "Unsupported architecture: $ARCH" && exit 1 ;; \
     esac; \
     wget -O /build/ttyd "https://github.com/tsl0922/ttyd/releases/latest/download/$FILE"; \
@@ -136,7 +117,7 @@ RUN set -eux; \
     apt-get autoremove -y; \
     rm /tmp/wrapper.tar.gz
 # 复制编译好的二进制和文件
-COPY --from=builder /build/ttyd /usr/local/bin
+COPY --from=builder /build/ttyd /usr/local/bin/
 COPY --from=builder /build/amdl/ /app/
 COPY --from=builder /build/backup /app/backup/
 COPY --from=builder /build/wrapper/ /app/wrapper/
