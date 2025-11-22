@@ -120,10 +120,9 @@ COPY --from=builder /build/ttyd /usr/local/bin/
 COPY --from=builder /build/amdl/ /app/
 COPY --from=builder /build/backup /app/backup/
 COPY --from=builder /build/wrapper/ /app/wrapper/
-COPY --from=builder /build/shell_web/shell_web /app/shell_web
 
 # 设置可执行权限
-RUN chmod +x /app/dl /app/sdl  /app/shell_web /app/wrapper/wm_server /app2/start.sh /usr/local/bin/ttyd \
+RUN chmod +x /app/dl /app/sdl /app/wrapper/wm_server /app2/start.sh /usr/local/bin/ttyd \
      && ln -sf /app/dl /usr/local/bin/dl \
      && ln -sf /app/sdl /usr/local/bin/sdl
 ENV TTYD_USER=""
