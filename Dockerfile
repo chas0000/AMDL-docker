@@ -77,6 +77,7 @@ RUN set -eux; \
         curl \
         ca-certificates \
         ffmpeg \
+        tmux \
         && rm -rf /var/lib/apt/lists/*; \
     \
     # Build and install GPAC
