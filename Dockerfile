@@ -128,6 +128,8 @@ COPY --from=builder /build/shell_web/shell_web /app/shell_web
 RUN chmod +x /app/dl /app/sdl  /app/shell_web /app/wrapper/wm_server /app2/start.sh \
      && ln -sf /app/dl /usr/local/bin/dl \
      && ln -sf /app/sdl /usr/local/bin/sdl
+ENV TTYD_USER=""
+ENV TTYD_PASS=""
 
 # 设置默认启动命令（可改为你的 start.sh）
 CMD ["/bin/bash","/app2/start.sh"]
