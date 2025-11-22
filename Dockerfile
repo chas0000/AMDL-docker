@@ -119,6 +119,7 @@ RUN set -eux; \
 # 复制编译好的二进制和文件
 COPY --from=builder /build/ttyd /usr/local/bin/
 COPY --from=builder /build/amdl/ /app/
+COPY --from=builder /build/wrapper/ /app/wrapper/
 COPY --from=builder /build/backup /app/backup/
 
 # 设置可执行权限
