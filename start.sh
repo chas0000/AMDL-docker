@@ -55,10 +55,10 @@ TTYD_CMD="tmux attach -t $SESSION_NAME"
 
 if [ -n "$TTYD_USER" ] && [ -n "$TTYD_PASS" ]; then
     echo "[INFO] Starting ttyd with auth..."
-    exec ttyd -W -c "$TTYD_USER:$TTYD_PASS" $TTYD_CMD
+    exec ttyd -W env LANG=zh_CN.UTF-8 LC_ALL=zh_CN.UTF-8 -c "$TTYD_USER:$TTYD_PASS" $TTYD_CMD
 else
     echo "[INFO] Starting ttyd without auth..."
-    exec ttyd -W $TTYD_CMD
+    exec ttyd -W env LANG=zh_CN.UTF-8 LC_ALL=zh_CN.UTF-8 $TTYD_CMD
 fi
     
 cd /app/wrapper
