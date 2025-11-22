@@ -75,7 +75,6 @@ RUN set -eux; \
         curl \
         ca-certificates \
         ffmpeg \
-        ttyd \
         tmux \
         && rm -rf /var/lib/apt/lists/*; \
     \
