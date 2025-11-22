@@ -4,7 +4,7 @@ set -e
 echo "[INFO] Starting application..."
 
 # ===============================
-# 1. 检查并复制配置文件（无覆盖逻辑错误）
+#  检查并复制配置文件（无覆盖逻辑错误）
 # ===============================
 
 # 1. 检查 /app/amdl/config.yaml 是否存在
@@ -21,12 +21,45 @@ else
     cp /app/config/sky_config.yaml /app/sky_config.yaml  
 fi
 
-# ===============================
-# 2. 启动后台服务
-# ===============================
-# 启动 tmux 会话（如果尚未启动），将 `webterm` 作为会话名
+# -----------------------------
+#  设置 tmux socket 目录
+# -----------------------------
+export TMUX_TMPDIR=/tmp/tmux
+mkdir -p "$TMUX_TMPDIR"
+chmod 700 "$TMUX_TMPDIR"
 
-tmux new-session -d -s webterm  # -d 表示后台启动
+SESSION_NAME=mysession
+
+# -----------------------------
+#  启动 tmux session 后台运行 Python（只启动一次）
+# -----------------------------
+if ! tmux has-session -t $SESSION_NAME 2>/dev/null; then
+    echo "[INFO] Creating tmux session $SESSION_NAME..."
+    tmux new-session -d -s $SESSION_NAME "bash"
+fi
+
+# -----------------------------
+#  等待 session 就绪
+# -----------------------------
+sleep 2
+
+# -----------------------------
+#  清理可能的嵌套 tmux 环境
+# -----------------------------
+unset TMUX
+
+# -----------------------------
+#  启动 ttyd 并 attach tmux session
+# -----------------------------
+TTYD_CMD="tmux attach -t $SESSION_NAME"
+
+if [ -n "$TTYD_USER" ] && [ -n "$TTYD_PASS" ]; then
+    echo "[INFO] Starting ttyd with auth..."
+    exec ttyd -W -c "$TTYD_USER:$TTYD_PASS" $TTYD_CMD
+else
+    echo "[INFO] Starting ttyd without auth..."
+    exec ttyd -W $TTYD_CMD
+fi
     
 cd /app/wrapper
 ./wm_server --config /app/config/manager.json &
