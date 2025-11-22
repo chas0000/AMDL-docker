@@ -119,7 +119,6 @@ RUN set -eux; \
 COPY --from=builder /build/ttyd /usr/local/bin/
 COPY --from=builder /build/amdl/ /app/
 COPY --from=builder /build/backup /app/backup/
-COPY --from=builder /build/wrapper/ /app/wrapper/
 
 # 设置可执行权限
 RUN chmod +x /app/dl /app/sdl /app/wrapper/wm_server /app2/start.sh /usr/local/bin/ttyd \
