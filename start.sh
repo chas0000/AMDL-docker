@@ -64,8 +64,6 @@ fi
 cd /app/wrapper
 ./wm_server --config /app/config/manager.json &
 
-cd /app
-./shell_web &
 
 echo "[INFO] All services started."
 
