@@ -24,7 +24,11 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 
 	// 固定 tmux 会话名
 	cmd := exec.Command("tmux", "attach-session", "-t", "webterm")
-	cmd.Env = append(os.Environ(), "TERM=xterm-256color")
+	cmd.Env = append(os.Environ(),
+    "TERM=xterm-256color",
+    "LANG=zh_CN.UTF-8",
+    "LC_ALL=zh_CN.UTF-8",
+)
 
 	ptmx, err := pty.Start(cmd)
 	if err != nil {
@@ -154,3 +158,4 @@ func main() {
 	fmt.Println("Server running on :18888")
 	http.ListenAndServe(":18888", nil)
 }
+
