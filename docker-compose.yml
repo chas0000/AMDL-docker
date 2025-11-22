@@ -2,16 +2,19 @@ services:
   amdl_m:
     container_name: amdl
     image: chaslllll/amdl_m:latest  #或ghcr.io/chas0000/amdl_m:latest
-    network_mode: bridge
-  
+    network_mode: host  #或网桥模式bridge
+    #environment:
+    #  TTYD_USER: ""                  #TTYD的用户名和密码，两者都设定时才起效，否则为无鉴权模式
+    #  TTYD_PASS: ""
     # 如果不使用 host 模式，可以使用端口映射
-    ports:
-       - "8080:8080"
-       - "18888:18888"
+    #ports:
+    #   - "8080:8080"
+    #   - "18888:18888"
     volumes:
       - /mnt/disk1:/mnt/disk1        #映射需要保持音乐的目录，后半段需与config.toml中一致，自己修改
       - ./config/:/app/config/      #amdl的config存放位置，第一次运行时会自动拷贝备份
       - ./instances/:/app/wrapper/instances  #各区wrapper保存位置
+
 
 
 
