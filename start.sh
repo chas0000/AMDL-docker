@@ -22,7 +22,7 @@ else
 fi
 cd /app/wrapper
 ./wm_server --config /app/config/manager.json &
-
+cd /app
 # -----------------------------
 #  设置 tmux socket 目录
 # -----------------------------
