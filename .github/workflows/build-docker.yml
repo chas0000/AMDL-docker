@@ -111,6 +111,7 @@ jobs:
         echo "Using CC=$CC CXX=$CXX"
         which $CC
         $CC --version
+        set -x
         ./configure --static-bin
         make -j$(nproc)
         mv ./bin/gcc/MP4Box ${GITHUB_WORKSPACE}/output/MP4Box-arm64
