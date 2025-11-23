@@ -1,107 +1,17 @@
-# =========================
-# Stage 1: Build all binaries
-# =========================
-FROM golang:1.24-bullseye AS builder
 
-# 安装构建依赖
-RUN apt-get update && apt-get install -y \
-    git wget tar curl  build-essential pkg-config g++ cmake yasm zlib1g-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /build
-RUN mkdir -p /build/amdl && mkdir -p /build/backup && mkdir -p /build/wrapper
-
-
-# -------------------------
-# 1. 构建 apple-music-downloader
-# -------------------------
-RUN git clone https://github.com/zhaarey/apple-music-downloader.git \
-    && cd apple-music-downloader \
-    && CGO_ENABLED=0 GOOS=linux  go build -a -o dl main.go \
-    && cp dl /build/amdl/dl \
-    && cp config.yaml /build/backup/config.yaml
-
-# -------------------------
-# 2. 下载 sky8282/apple-music-downloader
-# -------------------------
-WORKDIR /build
-RUN mkdir -p ./sky
-RUN git clone --depth=1 https://github.com/sky8282/apple-music-downloader.git ./sky/apple-music-downloader
-WORKDIR /build/sky/apple-music-downloader
-RUN sed -i 's|config.yaml|sky_config.yaml|g' ./main.go \
-    && sed -i 's|config.yaml|sky_config.yaml|g' ./internal/core/state.go    
-RUN go mod tidy
-RUN CGO_ENABLED=0 GOOS=linux  go build -a -o sdl main.go \
-    && cp sdl /build/amdl/sdl \
-    && cp config.yaml /build/backup/sky_config.yaml     
-
-# -------------------------
-# 3. 构建 wrapper-manager-v1
-# -------------------------
-WORKDIR /build
-RUN git clone https://github.com/sky8282/wrapper-manager-v1.git \
-    && cd wrapper-manager-v1 \
-    && go mod init wrapper-manager \
-    && go mod tidy \
-    && CGO_ENABLED=0 GOOS=linux  go build -a -o wm_server main.go \
-    && cp wm_server /build/wrapper/wm_server \
-    && cp index.html /build/wrapper/index.html
-
-WORKDIR /build
-RUN set -eux; \
-    ARCH=$(dpkg --print-architecture); \
-    case "$ARCH" in \
-        amd64)  FILE="ttyd.x86_64" ;; \
-        arm64)  FILE="ttyd.aarch64" ;; \
-        *) echo "Unsupported architecture: $ARCH" && exit 1 ;; \
-    esac; \
-    wget -O /build/ttyd "https://github.com/tsl0922/ttyd/releases/latest/download/$FILE"
-
-
-# =========================
-# Stage 2: Create final image
-# =========================
 FROM ubuntu:22.04
 
 WORKDIR /app
 COPY ./start.sh /app2/
+COPY ./output /app/
+COPY ./backup /app/
 RUN set -eux; \
     apt-get update && apt-get install -y --no-install-recommends \
-        g++ \
-        make \
-        cmake \
-        zlib1g-dev \
-        coreutils \
-        git \
-        wget \
-        curl \
-        ca-certificates \
+        nano\
         ffmpeg \
         tmux \
         && rm -rf /var/lib/apt/lists/*; \
     \
-    # Build and install GPAC
-    git clone --depth=1 https://github.com/gpac/gpac.git ./build/gpac || exit 1; \
-    cd ./build/gpac; \
-    ./configure; \
-    make -j$(nproc); \
-    make install; \
-    MP4BOX_PATH=$(command -v MP4Box); \
-    if [ -n "$MP4BOX_PATH" ]; then ln -sf "$MP4BOX_PATH" "$(dirname "$MP4BOX_PATH")/mp4box"; fi; \
-    cd /app; \
-    \
-    # Build and install Bento4
-    git clone --depth=1 https://github.com/axiomatic-systems/Bento4.git ./build/Bento4 || exit 1; \
-    mkdir -p ./build/Bento4/cmakebuild; \
-    cd ./build/Bento4/cmakebuild; \
-    cmake -DCMAKE_BUILD_TYPE=Release ..; \
-    make -j$(nproc); \
-    make install; \
-    cd /app; \
-    \
-    # Clean up
-    rm -rf ./build; 
-    
 RUN set -eux; \
     ARCH=$(dpkg --print-architecture); \
     if [ "$ARCH" = "amd64" ]; then \
@@ -118,15 +28,36 @@ RUN set -eux; \
     apt-get autoremove -y; \
     rm /tmp/wrapper.tar.gz
 # 复制编译好的二进制和文件
-COPY --from=builder /build/ttyd /usr/local/bin/
-COPY --from=builder /build/amdl/ /app/
-COPY --from=builder /build/wrapper/ /app/wrapper/
-COPY --from=builder /build/backup /app/backup/
+# 根据架构选择二进制（dl, sdl, ttyd）
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+        echo "==> using amd64 binaries"; \
+        mv /app/dl-amd64 /app/dl && \
+        mv /app/sdl-amd64 /app/sdl && \
+        mv /app/wm_server-amd64 /app/wrapper/wm_server && \
+        mv /app/MP4Box-amd64 /usr/local/bin/MP4Box &&\
+        mv /app/mp4decrypt-amd64 /usr/local/bin/mp4decrypt &&\
+        mv /app/ttyd-amd64 /usr/local/bin/ttyd &&\
+        rm /app/output && \
+        chmod 755 /app/wrapper/wm_server /usr/local/bin/mp4decrypt /usr/local/bin/MP4Box /usr/local/bin/ttyd /app/dl /app/sdl &&\
+        ln -sf /app/dl /usr/local/bin/dl &&\
+        ln -sf /app/sdl /usr/local/bin/sdl; \
+    elif [ "$TARGETARCH" = "arm64" ]; then \
+        echo "==> using arm64 binaries"; \
+        mv /app/dl-arm64 /app/dl && \
+        mv /app/sdl-arm64 /app/sdl && \
+        mv /app/wm_server-arm64 /app/wrapper/wm_server && \
+        mv /app/MP4Box-arm64 /usr/local/bin/MP4Box &&\
+        mv /app/mp4decrypt-arm64 /usr/local/bin/mp4decrypt &&\
+        mv /app/ttyd-arm64 /usr/local/bin/ttyd &&\
+        rm /app/output && \
+        chmod 755 /app/wrapper/wm_server /usr/local/bin/mp4decrypt /usr/local/bin/MP4Box /usr/local/bin/ttyd /app/dl /app/sdl &&\
+        ln -sf /app/dl /usr/local/bin/dl &&\
+        ln -sf /app/sdl /usr/local/bin/sdl; \
+    else \
+        echo "❌ 不支持的架构: $TARGETARCH"; exit 1; \
+    fi 
 
-# 设置可执行权限
-RUN chmod +x /app/dl /app/sdl /app/wrapper/wm_server /app2/start.sh /usr/local/bin/ttyd \
-     && ln -sf /app/dl /usr/local/bin/dl \
-     && ln -sf /app/sdl /usr/local/bin/sdl
+
 ENV TTYD_USER=""
 ENV TTYD_PASS=""
 
