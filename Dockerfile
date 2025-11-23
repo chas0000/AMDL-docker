@@ -72,11 +72,13 @@ RUN set -eux; \
             mv /app/output/dl-amd64 /app/dl; \
             mv /app/output/sdl-amd64 /app/sdl; \
             mv /app/output/wm_server-amd64 /app/wrapper/wm_server; \
+            mv /app/output/index.html /app/wrapper/index.html; \
             mv /app/output/ttyd-amd64 /usr/local/bin/ttyd ;; \
         arm64) \
             mv /app/output/dl-arm64 /app/dl; \
             mv /app/output/sdl-arm64 /app/sdl; \
             mv /app/output/wm_server-arm64 /app/wrapper/wm_server; \
+            mv /app/output/index.html /app/wrapper/index.html; \
             mv /app/output/ttyd-arm64 /usr/local/bin/ttyd ;; \
         *) echo "❌ 不支持的架构: $TARGETARCH" && exit 1 ;; \
     esac; \
