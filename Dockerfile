@@ -66,7 +66,7 @@ RUN set -eux; \
 # 根据架构选择二进制文件
 RUN set -eux; \
     ARCH=$(dpkg --print-architecture); \
-    ls /app
+    ls /app; \
     case "$ARCH" in \
         amd64) \
             mv /app/dl-amd64 /app/dl; \
