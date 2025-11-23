@@ -90,9 +90,12 @@ jobs:
 
     - name: build MP4Box (amd64 + arm64)
       run: |
+        mkdir -p ${GITHUB_WORKSPACE}/output
+
         apt update && apt install -y \
            build-essential pkg-config g++ git cmake yasm zlib1g-dev \
            crossbuild-essential-arm64  
+
         git clone https://github.com/gpac/gpac.git gpac_public
 
         ### ===== 编译 amd64 =====
@@ -100,32 +103,39 @@ jobs:
         ./configure --static-bin
         make -j$(nproc)
         mv ./bin/gcc/MP4Box ${GITHUB_WORKSPACE}/output/MP4Box-amd64
-        make clean
 
         ### ===== 编译 arm64 =====
-        ./configure --static-bin --target-os=linux --target-arch=arm64 \
-          --cc=aarch64-linux-gnu-gcc --cxx=aarch64-linux-gnu-g++
+        make clean
+        export CC=aarch64-linux-gnu-gcc
+        export CXX=aarch64-linux-gnu-g++
+        export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig
+        ./configure --static-bin
         make -j$(nproc)
         mv ./bin/gcc/MP4Box ${GITHUB_WORKSPACE}/output/MP4Box-arm64
 
         cd ${GITHUB_WORKSPACE}
-        ls -l MP4Box-*
+        ls -l output/MP4Box-*
 
     - name: build mp4decrypt (amd64 + arm64)
       run: |
+        mkdir -p ${GITHUB_WORKSPACE}/output
+
         apt update && apt install -y \
            build-essential pkg-config g++ git cmake yasm zlib1g-dev \
            crossbuild-essential-arm64  
-        git clone --depth=1 https://github.com/axiomatic-systems/Bento4.git
+
+        git clone --depth=1 https://github.com/axiomatic-systems/Bento4.git Bento4
 
         ### ===== 编译 amd64 =====
-        cd Bento4
+        mkdir -p Bento4/build-amd64
+        cd Bento4/build-amd64
         cmake -DCMAKE_BUILD_TYPE=Release ..
         make -j$(nproc)
         cp ./mp4decrypt ${GITHUB_WORKSPACE}/output/mp4decrypt-amd64
-        make clean
 
         ### ===== 编译 arm64 =====
+        mkdir -p ../build-arm64
+        cd ../build-arm64
         cmake -DCMAKE_BUILD_TYPE=Release \
            -DCMAKE_SYSTEM_NAME=Linux \
            -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
@@ -135,8 +145,7 @@ jobs:
         cp ./mp4decrypt ${GITHUB_WORKSPACE}/output/mp4decrypt-arm64
 
         cd ${GITHUB_WORKSPACE}
-        ls -l mp4decrypt-*
-
+        ls -l output/mp4decrypt-*
 
 
 
