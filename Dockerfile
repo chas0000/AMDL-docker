@@ -65,7 +65,7 @@ RUN set -eux; \
 
 # 根据架构选择二进制文件
 RUN set -eux; \
-    case "$TARGETARCH" in \
+    case "$ARCH" in \
         amd64) \
             mv /app/dl-amd64 /app/dl; \
             mv /app/sdl-amd64 /app/sdl; \
