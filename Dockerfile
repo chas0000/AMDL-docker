@@ -28,6 +28,32 @@ RUN set -eux; \
     apt-get autoremove -y; \
     rm /tmp/wrapper.tar.gz
 # 复制编译好的二进制和文件
+RUN set -eux; \
+    apk add --no-cache  g++ make cmake zlib-dev coreutils; \
+    \
+    # Build and install GPAC
+    \
+    git clone --depth=1 https://github.com/gpac/gpac.git ./build/gpac || exit 1; \
+    cd ./build/gpac; \
+    ./configure; \
+    make -j$(nproc); \
+    mv ./bin/gcc/MP4Box /usr/local/bin/MP4Box; \
+    cd /app; \
+    \
+    # Build and install Bento4
+    \
+    git clone --depth=1 https://github.com/axiomatic-systems/Bento4.git ./build/Bento4 || exit 1; \
+    mkdir -p ./build/Bento4/cmakebuild; \
+    cd ./build/Bento4/cmakebuild; \
+    cmake -DCMAKE_BUILD_TYPE=Release ..; \
+    make -j$(nproc); \
+    mv ./mp4decrypt /usr/local/bin/mp4decrypt; \
+    cd /app; \
+    \
+    # Clean up
+    \
+    rm -rf ./build; \
+    apk del git g++ make cmake zlib-dev coreutils;
 # 根据架构选择二进制（dl, sdl, ttyd）
 RUN if [ "$TARGETARCH" = "amd64" ]; then \
         echo "==> using amd64 binaries"; \
