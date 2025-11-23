@@ -5,8 +5,8 @@ WORKDIR /app
 
 # 复制文件
 COPY ./start.sh /app2/
-COPY ./output /app/
-COPY ./backup /app/
+COPY ./output/ /app/output/
+COPY ./backup/ /app/backup/
 
 # 安装基础依赖
 RUN set -eux; \
@@ -69,15 +69,15 @@ RUN set -eux; \
     ls /app; \
     case "$ARCH" in \
         amd64) \
-            mv /app/dl-amd64 /app/dl; \
-            mv /app/sdl-amd64 /app/sdl; \
-            mv /app/wm_server-amd64 /app/wrapper/wm_server; \
-            mv /app/ttyd-amd64 /usr/local/bin/ttyd ;; \
+            mv /app/output/dl-amd64 /app/dl; \
+            mv /app/output/sdl-amd64 /app/sdl; \
+            mv /app/output/wm_server-amd64 /app/wrapper/wm_server; \
+            mv /app/output/ttyd-amd64 /usr/local/bin/ttyd ;; \
         arm64) \
-            mv /app/dl-arm64 /app/dl; \
-            mv /app/sdl-arm64 /app/sdl; \
-            mv /app/wm_server-arm64 /app/wrapper/wm_server; \
-            mv /app/ttyd-arm64 /usr/local/bin/ttyd ;; \
+            mv /app/output/dl-arm64 /app/dl; \
+            mv /app/output/sdl-arm64 /app/sdl; \
+            mv /app/output/wm_server-arm64 /app/wrapper/wm_server; \
+            mv /app/output/ttyd-arm64 /usr/local/bin/ttyd ;; \
         *) echo "❌ 不支持的架构: $TARGETARCH" && exit 1 ;; \
     esac; \
     rm -rf /app/output; \
