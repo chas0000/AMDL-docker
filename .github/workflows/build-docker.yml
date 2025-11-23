@@ -105,10 +105,14 @@ jobs:
         mv ./bin/gcc/MP4Box ${GITHUB_WORKSPACE}/output/MP4Box-amd64
 
         ### ===== 编译 arm64 =====
+        cd gpac_public
         make clean
         export CC=aarch64-linux-gnu-gcc
         export CXX=aarch64-linux-gnu-g++
         export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig
+        echo "Using CC=$CC CXX=$CXX"
+        which $CC
+        $CC --version
         ./configure --static-bin
         make -j$(nproc)
         mv ./bin/gcc/MP4Box ${GITHUB_WORKSPACE}/output/MP4Box-arm64
