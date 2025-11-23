@@ -27,6 +27,7 @@ RUN set -eux; \
 # 下载 wrapper 根据架构
 RUN set -eux; \
     ARCH=$(dpkg --print-architecture); \
+    echo "架构为: $ARCH"
     case "$ARCH" in \
         amd64) WRAPPER_URL="https://github.com/zhaarey/wrapper/releases/download/linux.V2/wrapper.x86_64.tar.gz" ;; \
         arm64) WRAPPER_URL="https://github.com/zhaarey/wrapper/releases/download/arm64/wrapper.arm64.tar.gz" ;; \
