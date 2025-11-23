@@ -105,7 +105,7 @@ jobs:
         mv ./bin/gcc/MP4Box ${GITHUB_WORKSPACE}/output/MP4Box-amd64
 
         ### ===== 编译 arm64 =====
-        cd gpac_public
+        cd ${GITHUB_WORKSPACE}/gpac_public
         make clean
         export CC=aarch64-linux-gnu-gcc
         export CXX=aarch64-linux-gnu-g++
