@@ -60,11 +60,9 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
         mv /app/dl-amd64 /app/dl && \
         mv /app/sdl-amd64 /app/sdl && \
         mv /app/wm_server-amd64 /app/wrapper/wm_server && \
-        mv /app/MP4Box-amd64 /usr/local/bin/MP4Box &&\
-        mv /app/mp4decrypt-amd64 /usr/local/bin/mp4decrypt &&\
         mv /app/ttyd-amd64 /usr/local/bin/ttyd &&\
         rm /app/output && \
-        chmod 755 /app/wrapper/wm_server /usr/local/bin/mp4decrypt /usr/local/bin/MP4Box /usr/local/bin/ttyd /app/dl /app/sdl &&\
+        chmod 755 /app/wrapper/wm_server  /usr/local/bin/ttyd /app/dl /app/sdl &&\
         ln -sf /app/dl /usr/local/bin/dl &&\
         ln -sf /app/sdl /usr/local/bin/sdl; \
     elif [ "$TARGETARCH" = "arm64" ]; then \
@@ -72,11 +70,9 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
         mv /app/dl-arm64 /app/dl && \
         mv /app/sdl-arm64 /app/sdl && \
         mv /app/wm_server-arm64 /app/wrapper/wm_server && \
-        mv /app/MP4Box-arm64 /usr/local/bin/MP4Box &&\
-        mv /app/mp4decrypt-arm64 /usr/local/bin/mp4decrypt &&\
         mv /app/ttyd-arm64 /usr/local/bin/ttyd &&\
         rm /app/output && \
-        chmod 755 /app/wrapper/wm_server /usr/local/bin/mp4decrypt /usr/local/bin/MP4Box /usr/local/bin/ttyd /app/dl /app/sdl &&\
+        chmod 755 /app/wrapper/wm_server  /usr/local/bin/ttyd /app/dl /app/sdl &&\
         ln -sf /app/dl /usr/local/bin/dl &&\
         ln -sf /app/sdl /usr/local/bin/sdl; \
     else \
