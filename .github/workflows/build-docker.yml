@@ -80,7 +80,14 @@ jobs:
     - name: List output files
       run: |
         ls -lR ${GITHUB_WORKSPACE}/output
-
+    - name: Move files    
+      run: |
+        ls -lR ${GITHUB_WORKSPACE}/output
+        mkdir -p ${GITHUB_WORKSPACE}/backup/
+        mv ${GITHUB_WORKSPACE}/output/config.yaml ${GITHUB_WORKSPACE}/backup/config.yaml
+        mv ${GITHUB_WORKSPACE}/output/sky_config.yaml ${GITHUB_WORKSPACE}/backup/sky_config.yaml
+        ls -l ${GITHUB_WORKSPACE}/backup
+  
     - name: Upload AMDL artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -92,17 +99,11 @@ jobs:
     - name: Upload Go build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: MP4Box-output
+        name: config-output
         path: |
-          ${{ github.workspace }}/MP4Box
+          ${{ github.workspace }}/backup
 
-    - name: Move files    
-      run: |
-        ls -lR ${GITHUB_WORKSPACE}/output
-        mkdir -p ${GITHUB_WORKSPACE}/backup/
-        mv ${GITHUB_WORKSPACE}/output/config.yaml ${GITHUB_WORKSPACE}/backup/config.yaml
-        mv ${GITHUB_WORKSPACE}/output/sky_config.yaml ${GITHUB_WORKSPACE}/backup/sky_config.yaml
-        ls -l ${GITHUB_WORKSPACE}/backup
+
 
    # 构建 amd64 镜像
   build-amd64:
@@ -114,6 +115,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Download output
+        uses: actions/download-artifact@v4
+        with:
+          name: amdl-output
+          path: ./output
+      - name: Download backup
+        uses: actions/download-artifact@v4
+        with:
+          name: config-output
+          path: ./backup
+
+        
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -159,6 +172,16 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Download output
+        uses: actions/download-artifact@v4
+        with:
+          name: amdl-output
+          path: ./output
+      - name: Download backup
+        uses: actions/download-artifact@v4
+        with:
+          name: config-output
+          path: ./backup
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
