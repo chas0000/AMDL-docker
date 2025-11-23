@@ -14,9 +14,8 @@ RUN set -eux; \
         ffmpeg \
         tmux \
         && rm -rf /var/lib/apt/lists/*; \
-    \
-RUN set -eux; \
-    ARCH=$(dpkg --print-architecture); \
+    
+RUN ARCH=$(dpkg --print-architecture); \
     if [ "$ARCH" = "amd64" ]; then \
         WRAPPER_URL="https://github.com/zhaarey/wrapper/releases/download/linux.V2/wrapper.x86_64.tar.gz"; \
     elif [ "$ARCH" = "arm64" ]; then \
@@ -31,8 +30,7 @@ RUN set -eux; \
     apt-get autoremove -y; \
     rm /tmp/wrapper.tar.gz
 # 复制编译好的二进制和文件
-RUN set -eux; \
-     apt-get update && apt-get install -y --no-install-recommends  g++ make cmake zlib-dev coreutils; \
+RUN  apt-get update && apt-get install -y --no-install-recommends  g++ make cmake zlib-dev coreutils; \
     \
     # Build and install GPAC
     \
