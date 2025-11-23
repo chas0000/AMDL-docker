@@ -4,6 +4,160 @@ on:
   workflow_dispatch:
 
 jobs:
+  build-and-release:
+    runs-on: ubuntu-latest  # 使用 GitHub 提供的 ubuntu runner
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget curl git make build-essential bash zlib1g-dev ca-certificates
+        wget https://golang.org/dl/go1.23.9.linux-amd64.tar.gz
+        sudo tar -C /usr/local -xvzf go1.23.9.linux-amd64.tar.gz
+        echo "export PATH=\$PATH:/usr/local/go/bin" >> ~/.bashrc
+        source ~/.bashrc
+        go version
+
+    - name: Build apple-music-downloader (zhaarey)
+      run: |
+        git clone https://github.com/zhaarey/apple-music-downloader.git
+        cd ${GITHUB_WORKSPACE}/apple-music-downloader
+        
+        # 同时编译 amd64 与 arm64
+        mkdir -p ${GITHUB_WORKSPACE}/output
+        for ARCH in amd64 arm64; do
+          echo "==> Building for $ARCH"
+          CGO_ENABLED=0 GOOS=linux GOARCH=$ARCH go build -a -o dl-$ARCH main.go
+          mv dl-$ARCH ${GITHUB_WORKSPACE}/output/
+        done
+        cp config.yaml ${GITHUB_WORKSPACE}/output/
+
+    - name: Build apple-music-downloader (sky8282)
+      run: |
+        mkdir -p ./sky
+        cd ${GITHUB_WORKSPACE}/sky
+        git clone https://github.com/sky8282/apple-music-downloader.git
+        cd ${GITHUB_WORKSPACE}/sky/apple-music-downloader
+        sed -i 's|config.yaml|sky_config.yaml|g' ./main.go
+        sed -i 's|config.yaml|sky_config.yaml|g' ./internal/core/state.go
+        go mod tidy
+        mkdir -p ${GITHUB_WORKSPACE}/output/
+        for ARCH in amd64 arm64; do
+          echo "==> Building sky version for $ARCH"
+          CGO_ENABLED=0 GOOS=linux GOARCH=$ARCH go build -a -o sdl-$ARCH main.go
+          mv sdl-$ARCH ${GITHUB_WORKSPACE}/output/
+        done
+        cp config.yaml ${GITHUB_WORKSPACE}/output/sky_config.yaml
+
+    - name: Build  wrapper-manager-v1
+      run: |
+        git clone  https://github.com/sky8282/wrapper-manager-v1.git
+        cd ${GITHUB_WORKSPACE}/wrapper-manager-v1
+        go mod init wrapper-manager
+        go mod tidy
+        for ARCH in amd64 arm64; do
+          echo "==> Building wrapper-manager-v1 for $ARCH"
+          CGO_ENABLED=0 GOOS=linux GOARCH=$ARCH go build -a -o wm_server-$ARCH main.go
+          mv wm_server-$ARCH ${GITHUB_WORKSPACE}/output/
+        done
+
+
+    - name: Download ttyd (multi-arch)
+      run: |
+        apt update && apt install wget curl -y
+        mkdir -p ${GITHUB_WORKSPACE}/output
+        for ARCH in amd64 arm64; do
+          if [ "$ARCH" = "amd64" ]; then DLARCH="x86_64"; else DLARCH="aarch64"; fi
+          echo "==> Downloading ttyd for $ARCH ($DLARCH)"
+          URL=$(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url | grep "$DLARCH" | cut -d '"' -f 4 | head -n 1)
+          wget "$URL" -O ${GITHUB_WORKSPACE}/output/ttyd-$ARCH
+          chmod +x ${GITHUB_WORKSPACE}/output/ttyd-$ARCH
+        done
+
+    - name: List output files
+      run: |
+        ls -lR ${GITHUB_WORKSPACE}/output
+
+    - name: Upload AMDL artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: amdl-output
+        path: |
+          ${{ github.workspace }}/output
+
+    - name: build MP4Box (amd64 + arm64)
+      run: |
+        apt update && apt install -y \
+           build-essential pkg-config g++ git cmake yasm zlib1g-dev \
+           crossbuild-essential-arm64  
+        git clone https://github.com/gpac/gpac.git gpac_public
+
+        ### ===== 编译 amd64 =====
+        cd gpac_public
+        ./configure --static-bin
+        make -j$(nproc)
+        mv ./bin/gcc/MP4Box ${GITHUB_WORKSPACE}/output/MP4Box-amd64
+        make clean
+
+        ### ===== 编译 arm64 =====
+        ./configure --static-bin --target-os=linux --target-arch=arm64 \
+          --cc=aarch64-linux-gnu-gcc --cxx=aarch64-linux-gnu-g++
+        make -j$(nproc)
+        mv ./bin/gcc/MP4Box ${GITHUB_WORKSPACE}/output/MP4Box-arm64
+
+        cd ${GITHUB_WORKSPACE}
+        ls -l MP4Box-*
+
+    - name: build mp4decrypt (amd64 + arm64)
+      run: |
+        apt update && apt install -y \
+           build-essential pkg-config g++ git cmake yasm zlib1g-dev \
+           crossbuild-essential-arm64  
+        git clone --depth=1 https://github.com/axiomatic-systems/Bento4.git
+
+        ### ===== 编译 amd64 =====
+        cd Bento4
+        cmake -DCMAKE_BUILD_TYPE=Release ..
+        make -j$(nproc)
+        cp ./mp4decrypt ${GITHUB_WORKSPACE}/output/mp4decrypt-amd64
+        make clean
+
+        ### ===== 编译 arm64 =====
+        cmake -DCMAKE_BUILD_TYPE=Release \
+           -DCMAKE_SYSTEM_NAME=Linux \
+           -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
+           -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc \
+           -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ ..
+        make -j$(nproc)
+        cp ./mp4decrypt ${GITHUB_WORKSPACE}/output/mp4decrypt-arm64
+
+        cd ${GITHUB_WORKSPACE}
+        ls -l mp4decrypt-*
+
+
+
+
+    - name: Upload Go build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: MP4Box-output
+        path: |
+          ${{ github.workspace }}/MP4Box
+
+    - name: Move files    
+      run: |
+        ls -lR ${GITHUB_WORKSPACE}/output
+        mkdir -p ${GITHUB_WORKSPACE}/backup/
+        mv ${GITHUB_WORKSPACE}/output/config.yaml ${GITHUB_WORKSPACE}/backup/config.yaml
+        mv ${GITHUB_WORKSPACE}/output/sky_config.yaml ${GITHUB_WORKSPACE}/backup/sky_config.yaml
+        ls -l ${GITHUB_WORKSPACE}/backup
+
+
+
+
   # 构建 amd64 镜像
   build-amd64:
     runs-on: ubuntu-latest
