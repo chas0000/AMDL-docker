@@ -160,6 +160,7 @@ jobs:
 
   # 构建 amd64 镜像
   build-amd64:
+    needs: pre-build
     runs-on: ubuntu-latest
     outputs:
       build_date: ${{ steps.set_build_date.outputs.build_date }}
@@ -205,6 +206,7 @@ jobs:
 
   # 构建 arm64 镜像
   build-arm64:
+    needs: pre-build
     runs-on: ubuntu-latest
     needs: []
     outputs:
