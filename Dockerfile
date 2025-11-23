@@ -32,7 +32,7 @@ RUN set -eux; \
         arm64) WRAPPER_URL="https://github.com/zhaarey/wrapper/releases/download/arm64/wrapper.arm64.tar.gz" ;; \
         *) echo "Unsupported architecture: $ARCH" && exit 1 ;; \
     esac; \
-    wget -q "$WRAPPER_URL" -O /tmp/wrapper.tar.gz; \
+    wget "$WRAPPER_URL" -O /tmp/wrapper.tar.gz; \
     mkdir -p /app/wrapper; \
     tar -xzf /tmp/wrapper.tar.gz -C /app/wrapper; \
     rm /tmp/wrapper.tar.gz
