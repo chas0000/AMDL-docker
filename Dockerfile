@@ -14,6 +14,7 @@ RUN set -eux; \
         nano \
         wget \
         curl \
+        ca-certificates \
         git \
         ffmpeg \
         tmux \
