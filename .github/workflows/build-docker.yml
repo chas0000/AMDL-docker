@@ -113,7 +113,7 @@ jobs:
         $CC --version
         set -x
         ./configure --static-bin
-        make -j$(nproc)
+        make -j$(nproc) VERBOSE=1
         mv ./bin/gcc/MP4Box ${GITHUB_WORKSPACE}/output/MP4Box-arm64
 
         cd ${GITHUB_WORKSPACE}
@@ -144,7 +144,7 @@ jobs:
            -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
            -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc \
            -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ ..
-        make -j$(nproc)
+        make -j$(nproc) VERBOSE=1
         cp ./mp4decrypt ${GITHUB_WORKSPACE}/output/mp4decrypt-arm64
 
         cd ${GITHUB_WORKSPACE}
