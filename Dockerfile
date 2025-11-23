@@ -8,6 +8,9 @@ COPY ./backup /app/
 RUN set -eux; \
     apt-get update && apt-get install -y --no-install-recommends \
         nano\
+        wget\
+        curl\
+        git\
         ffmpeg \
         tmux \
         && rm -rf /var/lib/apt/lists/*; \
@@ -29,7 +32,7 @@ RUN set -eux; \
     rm /tmp/wrapper.tar.gz
 # 复制编译好的二进制和文件
 RUN set -eux; \
-    apk add --no-cache  g++ make cmake zlib-dev coreutils; \
+     apt-get update && apt-get install -y --no-install-recommends  g++ make cmake zlib-dev coreutils; \
     \
     # Build and install GPAC
     \
@@ -53,7 +56,7 @@ RUN set -eux; \
     # Clean up
     \
     rm -rf ./build; \
-    apk del git g++ make cmake zlib-dev coreutils;
+    apt-get purge -y  wget curl git g++ make cmake zlib-dev coreutils;
 # 根据架构选择二进制（dl, sdl, ttyd）
 RUN if [ "$TARGETARCH" = "amd64" ]; then \
         echo "==> using amd64 binaries"; \
