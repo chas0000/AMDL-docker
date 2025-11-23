@@ -26,19 +26,16 @@ RUN set -eux; \
 
 # 下载 wrapper 根据架构
 RUN set -eux; \
-    case "$TARGETARCH" in \
+    ARCH=$(dpkg --print-architecture); \
+    case "$ARCH" in \
         amd64) WRAPPER_URL="https://github.com/zhaarey/wrapper/releases/download/linux.V2/wrapper.x86_64.tar.gz" ;; \
         arm64) WRAPPER_URL="https://github.com/zhaarey/wrapper/releases/download/arm64/wrapper.arm64.tar.gz" ;; \
-        *) echo "Unsupported architecture: $TARGETARCH" && exit 1 ;; \
+        *) echo "Unsupported architecture: $ARCH" && exit 1 ;; \
     esac; \
-    echo "Downloading wrapper for $TARGETARCH from $WRAPPER_URL"; \
-    for i in 1 2 3; do \
-        wget -q --tries=3 --timeout=30 "$WRAPPER_URL" -O /tmp/wrapper.tar.gz && break || echo "Retry $i failed"; \
-        sleep 2; \
-    done; \
+    wget -q "$WRAPPER_URL" -O /tmp/wrapper.tar.gz; \
     mkdir -p /app/wrapper; \
     tar -xzf /tmp/wrapper.tar.gz -C /app/wrapper; \
-    rm -f /tmp/wrapper.tar.gz
+    rm /tmp/wrapper.tar.gz
 
 # 构建 GPAC 和 Bento4
 RUN set -eux; \
