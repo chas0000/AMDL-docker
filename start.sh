@@ -4,62 +4,62 @@ set -e
 echo "[INFO] Starting application..."
 
 # ===============================
-#  检查并复制配置文件（无覆盖逻辑错误）
+# 复制配置文件
 # ===============================
+mkdir -p /app/config
 
-# 1. 检查 /app/amdl/config.yaml 是否存在
-if [ ! -f /app/config/config.yaml ]; then
-    cp /app/backup/config.yaml /app/config.yaml
-    cp /app/backup/config.yaml /app/config/config.yaml
-else
-    cp /app/config/config.yaml /app/config.yaml   
-fi
-if [ ! -f /app/config/sky_config.yaml ]; then
-    cp /app/backup/sky_config.yaml /app/sky_config.yaml
-    cp /app/backup/sky_config.yaml /app/config/sky_config.yaml
-else
-    cp /app/config/sky_config.yaml /app/sky_config.yaml  
-fi
+for f in config.yaml sky_config.yaml; do
+    if [ ! -f "/app/config/$f" ]; then
+        cp "/app/backup/$f" "/app/config/$f"
+    fi
+    cp "/app/config/$f" "/app/$f"
+done
+
+# 启动 wm_server
 cd /app/wrapper
 ./wm_server --config /app/config/manager.json &
 cd /app
-# -----------------------------
-#  设置 tmux socket 目录
-# -----------------------------
+
+# ===============================
+# 设置 tmux socket 目录
+# ===============================
 export TMUX_TMPDIR=/tmp/tmux
 mkdir -p "$TMUX_TMPDIR"
 chmod 700 "$TMUX_TMPDIR"
 
 SESSION_NAME=mysession
 
-# -----------------------------
-#  启动 tmux session 后台运行 Python（只启动一次）
-# -----------------------------
-if ! tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
-    echo "[INFO] Creating tmux session $SESSION_NAME..."
+# ===============================
+# 强制杀掉旧 tmux server（确保 -f 生效）
+# ===============================
+tmux kill-server 2>/dev/null || true
 
-    if [ -f /app/config/.tmux.conf ]; then
-        # 配置文件存在，加载自定义 tmux 配置
-        tmux new-session -d -s "$SESSION_NAME" -f /app/config/.tmux.conf "bash"
-    else
-        # 配置文件不存在，使用默认配置启动
-        tmux new-session -d -s "$SESSION_NAME" "bash"
-    fi
+# ===============================
+# 启动 tmux session
+# ===============================
+TMUX_CONF="/app/config/.tmux.conf"
+
+if [ -f "$TMUX_CONF" ]; then
+    echo "[INFO] Creating tmux session $SESSION_NAME with custom config..."
+    tmux -f "$TMUX_CONF" new-session -d -s "$SESSION_NAME" "bash"
+else
+    echo "[INFO] Creating tmux session $SESSION_NAME with default config..."
+    tmux new-session -d -s "$SESSION_NAME" "bash"
 fi
 
-# -----------------------------
-#  等待 session 就绪
-# -----------------------------
-sleep 2
+# ===============================
+# 等待 session 就绪
+# ===============================
+while ! tmux has-session -t "$SESSION_NAME" 2>/dev/null; do
+    sleep 0.1
+done
 
-# -----------------------------
-#  清理可能的嵌套 tmux 环境
-# -----------------------------
+# 清理可能的嵌套 tmux 环境
 unset TMUX
 
-# -----------------------------
-#  启动 ttyd 并 attach tmux session
-# -----------------------------
+# ===============================
+# 启动 ttyd 并 attach tmux session
+# ===============================
 TTYD_CMD="tmux attach -t $SESSION_NAME"
 
 if [ -n "$TTYD_USER" ] && [ -n "$TTYD_PASS" ]; then
@@ -69,13 +69,9 @@ else
     echo "[INFO] Starting ttyd without auth..."
     exec ttyd -W env LANG=zh_CN.UTF-8 LC_ALL=zh_CN.UTF-8 $TTYD_CMD
 fi
-    
-
-
-echo "[INFO] All services started."
 
 # ===============================
-# 3. 等待并正确退出
+# 等待并正确退出
 # ===============================
-wait -n     # 任一进程退出就退出容器
+wait -n
 exit $?
