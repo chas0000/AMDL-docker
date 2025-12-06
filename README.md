@@ -1,5 +1,7 @@
 # AMDL-docker
 
+由于sky佬的wrapper-manager-v1功能强大，第一次运行必须配置好wm_config.yaml和sky_config.yaml
+
 加入了sky佬的wrapper管理网页<https://github.com/sky8282/wrapper-manager-v1> ，以前的登录不再需要;
 ~~写了一个简单的下载web来调用命令~~，~~不再~~使用ttyd和tmux；
 
