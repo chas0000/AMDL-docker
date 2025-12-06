@@ -55,7 +55,9 @@ jobs:
     - name: Build  wrapper-manager-v1
       run: |
         git clone  https://github.com/sky8282/wrapper-manager-v1.git
+        mkdir -p ${GITHUB_WORKSPACE}/backup/
         cd ${GITHUB_WORKSPACE}/wrapper-manager-v1
+        cp ./config.yaml ${GITHUB_WORKSPACE}/backup/wm_config.yaml
         go mod init wrapper-manager
         go mod tidy
         cp index.html ${GITHUB_WORKSPACE}/output/index.html
