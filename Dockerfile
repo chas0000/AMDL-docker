@@ -48,7 +48,9 @@ RUN set -eux; \
     cd /app/build/gpac; \
     ./configure; \
     make -j$(nproc); \
-    mv ./bin/gcc/MP4Box /usr/local/bin/MP4Box; \
+    make install; \
+    MP4BOX_PATH=$(command -v MP4Box); \
+    if [ -n "$MP4BOX_PATH" ]; then ln -sf "$MP4BOX_PATH" "$(dirname "$MP4BOX_PATH")/mp4box"; fi; \
     \
     # Build Bento4
     git clone --depth=1 https://github.com/axiomatic-systems/Bento4.git /app/build/Bento4; \
