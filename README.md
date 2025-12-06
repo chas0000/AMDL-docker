@@ -1,6 +1,6 @@
 # AMDL-docker
 
-由于sky佬的wrapper-manager-v1功能强大，第一次运行必须配置好wm_config.yaml和sky_config.yaml
+由于sky佬的wrapper-manager-v1功能强大，第一次运行必须配置好wm_config.yaml和sky_config.yaml;wm_config.yaml中需要将json的位置改为/app/config/manager.json，wrapper位置不要修改，然后对应账号区域端口修改
 
 加入了sky佬的wrapper管理网页<https://github.com/sky8282/wrapper-manager-v1> ，以前的登录不再需要;
 ~~写了一个简单的下载web来调用命令~~，~~不再~~使用ttyd和tmux；
