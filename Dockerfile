@@ -23,6 +23,7 @@ RUN set -eux; \
         cmake \
         zlib1g-dev \
         coreutils \
+        iproute2  \
     && rm -rf /var/lib/apt/lists/*
 
 # 下载 wrapper 根据架构
