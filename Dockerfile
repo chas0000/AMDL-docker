@@ -61,7 +61,7 @@ RUN set -eux; \
         amd64) \
             mv /app/output/dl-amd64 /app/dl; \
             mv /app/output/sdl-amd64 /app/sdl; \
-            mv /app/output/wrapper-amd64/* /app/wrapper/
+            mv /app/output/wrapper-amd64/* /app/wrapper/; \
             mv /app/output/wm_server-amd64 /app/wrapper/wm_server; \
             mv /app/output/index.html /app/wrapper/index.html; \
             mv /app/output/ttyd-amd64 /usr/local/bin/ttyd ;; \
