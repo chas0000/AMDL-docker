@@ -93,6 +93,8 @@ jobs:
         artifact_url=$(curl -s "https://api.github.com/repos/WorldObservationLog/wrapper/actions/runs/${run_id}/artifacts" \
          | jq -r '.artifacts[] | select(.name | contains("Wrapper.arm64")) | .archive_download_url')
         curl -L -H "Accept: application/vnd.github+json" "$artifact_url" -o ${GITHUB_WORKSPACE}/wrapper_arm64.zip
+        ls
+        done
         
         
         
