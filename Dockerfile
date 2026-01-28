@@ -7,7 +7,6 @@ WORKDIR /app
 COPY ./start.sh /app2/
 COPY ./output/ /app/output/
 COPY ./backup/ /app/backup/
-COPY wrapper_amd64.zip wrapper_arm64.zip ./
 
 # 安装基础依赖
 RUN set -eux; \
@@ -27,19 +26,6 @@ RUN set -eux; \
         iproute2  \
         unzip  \
     && rm -rf /var/lib/apt/lists/*
-
-# 下载 wrapper 根据架构
-RUN set -eux; \
-    ARCH=$(dpkg --print-architecture); \
-    echo "架构为: $ARCH"; \
-    case "$ARCH" in \
-        amd64) \
-        unzip ./wrapper_amd64.zip -d /app/;; \
-        arm64) \
-        unzip ./wrapper_arm64.zip -d /app/;; \
-        *) echo "Unsupported architecture: $ARCH" && exit 1 ;; \
-    esac; \
-    rm -rf ./wrapper_amd64.zip ./wrapper_arm64.zip
 
 # 构建 GPAC 和 Bento4
 RUN set -eux; \
@@ -75,12 +61,14 @@ RUN set -eux; \
         amd64) \
             mv /app/output/dl-amd64 /app/dl; \
             mv /app/output/sdl-amd64 /app/sdl; \
+            mv /app/output/wrapper-amd64 /app/wrapper; \
             mv /app/output/wm_server-amd64 /app/wrapper/wm_server; \
             mv /app/output/index.html /app/wrapper/index.html; \
             mv /app/output/ttyd-amd64 /usr/local/bin/ttyd ;; \
         arm64) \
             mv /app/output/dl-arm64 /app/dl; \
             mv /app/output/sdl-arm64 /app/sdl; \
+            mv /app/output/wrapper-arm64 /app/wrapper; \
             mv /app/output/wm_server-arm64 /app/wrapper/wm_server; \
             mv /app/output/index.html /app/wrapper/index.html; \
             mv /app/output/ttyd-arm64 /usr/local/bin/ttyd ;; \
