@@ -61,14 +61,14 @@ RUN set -eux; \
         amd64) \
             mv /app/output/dl-amd64 /app/dl; \
             mv /app/output/sdl-amd64 /app/sdl; \
-            cp /app/output/wrapper-amd64/* /app/wrapper/; \
+            cp -r /app/output/wrapper-amd64/* /app/wrapper/; \
             mv /app/output/wm_server-amd64 /app/wrapper/wm_server; \
             mv /app/output/index.html /app/wrapper/index.html; \
             mv /app/output/ttyd-amd64 /usr/local/bin/ttyd ;; \
         arm64) \
             mv /app/output/dl-arm64 /app/dl; \
             mv /app/output/sdl-arm64 /app/sdl; \
-            cp /app/output/wrapper-arm64/* /app/wrapper/; \
+            cp -r /app/output/wrapper-arm64/* /app/wrapper/; \
             mv /app/output/wm_server-arm64 /app/wrapper/wm_server; \
             mv /app/output/index.html /app/wrapper/index.html; \
             mv /app/output/ttyd-arm64 /usr/local/bin/ttyd ;; \
