@@ -25,7 +25,7 @@ RUN set -eux; \
         zlib1g-dev \
         coreutils \
         iproute2  \
-        uzip  \
+        unzip  \
     && rm -rf /var/lib/apt/lists/*
 
 # 下载 wrapper 根据架构
