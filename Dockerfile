@@ -34,9 +34,9 @@ RUN set -eux; \
     echo "架构为: $ARCH"; \
     case "$ARCH" in \
         amd64) \
-        unzip ./wrapper_amd64.zip /app/
+        unzip ./wrapper_amd64.zip -d /app/;; \
         arm64) \
-        unzip ./wrapper_arm64.zip /app/
+        unzip ./wrapper_arm64.zip -d /app/;; \
         *) echo "Unsupported architecture: $ARCH" && exit 1 ;; \
     esac; \
     rm -rf ./wrapper_amd64.zip ./wrapper_arm64.zip
