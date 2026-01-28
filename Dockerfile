@@ -68,7 +68,7 @@ RUN set -eux; \
         arm64) \
             mv /app/output/dl-arm64 /app/dl; \
             mv /app/output/sdl-arm64 /app/sdl; \
-            mv /app/output/wrapper-arm64/* /app/wrapper/
+            mv /app/output/wrapper-arm64/* /app/wrapper/; \
             mv /app/output/wm_server-arm64 /app/wrapper/wm_server; \
             mv /app/output/index.html /app/wrapper/index.html; \
             mv /app/output/ttyd-arm64 /usr/local/bin/ttyd ;; \
