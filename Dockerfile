@@ -31,8 +31,20 @@ RUN set -eux; \
     ARCH=$(dpkg --print-architecture); \
     echo "架构为: $ARCH"; \
     case "$ARCH" in \
-        amd64) WRAPPER_URL="https://github.com/zhaarey/wrapper/releases/download/linux.V2/wrapper.x86_64.tar.gz" ;; \
-        arm64) WRAPPER_URL="https://github.com/zhaarey/wrapper/releases/download/arm64/wrapper.arm64.tar.gz" ;; \
+        amd64) \
+        latest_tag=$(curl -s https://api.github.com/repos/WorldObservationLog/wrapper/releases/latest \
+          | grep '"tag_name":' | cut -d '"' -f 4); \
+        WRAPPER_URL="https://github.com/WorldObservationLog/wrapper/releases/download/${latest_tag}/${latest_tag}.zip"; \
+        ;; \
+        arm64) \
+        workflow_id=$(curl -s https://api.github.com/repos/WorldObservationLog/wrapper/actions/workflows \
+          | jq -r '.workflows[] | select(.name=="Build for arm64") | .id'); \
+        run_id=$(curl -s https://api.github.com/repos/WorldObservationLog/wrapper/actions/workflows/${workflow_id}/runs?status=success \
+          | jq -r '.workflow_runs[0].id'); \
+        artifact_url=$(curl -s https://api.github.com/repos/WorldObservationLog/wrapper/actions/runs/${run_id}/artifacts \
+          | jq -r '.artifacts[0].archive_download_url'); \
+        curl -L -H "Accept: application/vnd.github+json" "$artifact_url" -o wrapper.zip; \
+        ;; \
         *) echo "Unsupported architecture: $ARCH" && exit 1 ;; \
     esac; \
     wget "$WRAPPER_URL" -O /tmp/wrapper.tar.gz; \
