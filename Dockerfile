@@ -7,6 +7,7 @@ WORKDIR /app
 COPY ./start.sh /app2/
 COPY ./output/ /app/output/
 COPY ./backup/ /app/backup/
+COPY wrapper_amd64.zip wrapper_arm64.zip ./
 
 # 安装基础依赖
 RUN set -eux; \
@@ -24,6 +25,7 @@ RUN set -eux; \
         zlib1g-dev \
         coreutils \
         iproute2  \
+        uzip  \
     && rm -rf /var/lib/apt/lists/*
 
 # 下载 wrapper 根据架构
@@ -32,25 +34,12 @@ RUN set -eux; \
     echo "架构为: $ARCH"; \
     case "$ARCH" in \
         amd64) \
-        latest_tag=$(curl -s https://api.github.com/repos/WorldObservationLog/wrapper/releases/latest \
-          | grep '"tag_name":' | cut -d '"' -f 4); \
-        WRAPPER_URL="https://github.com/WorldObservationLog/wrapper/releases/download/${latest_tag}/${latest_tag}.zip"; \
-        ;; \
+        unzip ./wrapper_amd64.zip /app/
         arm64) \
-        workflow_id=$(curl -s https://api.github.com/repos/WorldObservationLog/wrapper/actions/workflows \
-          | jq -r '.workflows[] | select(.name=="Build for arm64") | .id'); \
-        run_id=$(curl -s https://api.github.com/repos/WorldObservationLog/wrapper/actions/workflows/${workflow_id}/runs?status=success \
-          | jq -r '.workflow_runs[0].id'); \
-        artifact_url=$(curl -s https://api.github.com/repos/WorldObservationLog/wrapper/actions/runs/${run_id}/artifacts \
-          | jq -r '.artifacts[0].archive_download_url'); \
-        curl -L -H "Accept: application/vnd.github+json" "$artifact_url" -o wrapper.zip; \
-        ;; \
+        unzip ./wrapper_arm64.zip /app/
         *) echo "Unsupported architecture: $ARCH" && exit 1 ;; \
     esac; \
-    wget "$WRAPPER_URL" -O /tmp/wrapper.tar.gz; \
-    mkdir -p /app/wrapper; \
-    tar -xzf /tmp/wrapper.tar.gz -C /app/wrapper; \
-    rm /tmp/wrapper.tar.gz
+    rm -rf ./wrapper_amd64.zip ./wrapper_arm64.zip
 
 # 构建 GPAC 和 Bento4
 RUN set -eux; \
