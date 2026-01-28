@@ -123,7 +123,7 @@ jobs:
         path: |
           ${{ github.workspace }}/wrapper_amd64.zip
           
-    - name: Upload wrapper_amd64.zip artifacts
+    - name: Upload wrapper_arm64.zip artifacts
       uses: actions/upload-artifact@v4
       with:
         name: wrapper-arm64
