@@ -79,7 +79,24 @@ jobs:
           wget "$URL" -O ${GITHUB_WORKSPACE}/output/ttyd-$ARCH
           chmod +x ${GITHUB_WORKSPACE}/output/ttyd-$ARCH
         done
-
+        
+    - name: Download wrapper (multi-arch)
+      run: |
+        apt update && apt install wget curl unzip -y
+        latest_tag=$(curl -s https://api.github.com/repos/WorldObservationLog/wrapper/releases/latest | jq -r .tag_name)
+        amd64_url="https://github.com/WorldObservationLog/wrapper/releases/download/${latest_tag}/${latest_tag}.zip"
+        curl -L "$amd64_url" -o ${GITHUB_WORKSPACE}/wrapper_amd64.zip
+        workflow_id=$(curl -s https://api.github.com/repos/WorldObservationLog/wrapper/actions/workflows \
+         | jq -r '.workflows[] | select(.name=="Build for arm64") | .id')
+        run_id=$(curl -s "https://api.github.com/repos/WorldObservationLog/wrapper/actions/workflows/${workflow_id}/runs?status=success" \
+         | jq -r '.workflow_runs[0].id')
+        artifact_url=$(curl -s "https://api.github.com/repos/WorldObservationLog/wrapper/actions/runs/${run_id}/artifacts" \
+         | jq -r '.artifacts[] | select(.name | contains("Wrapper.arm64")) | .archive_download_url')
+        curl -L -H "Accept: application/vnd.github+json" "$artifact_url" -o ${GITHUB_WORKSPACE}/wrapper_arm64.zip
+        
+        
+        
+        
     - name: List output files
       run: |
         ls -lR ${GITHUB_WORKSPACE}/output
@@ -98,7 +115,20 @@ jobs:
         path: |
           ${{ github.workspace }}/output
 
-    
+    - name: Upload wrapper_amd64.zip artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: wrapper-amd64
+        path: |
+          ${{ github.workspace }}/wrapper_amd64.zip
+          
+    - name: Upload wrapper_amd64.zip artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: wrapper-arm64
+        path: |
+          ${{ github.workspace }}/wrapper_arm64.zip
+          
     - name: Upload Go build artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -128,7 +158,17 @@ jobs:
         with:
           name: config-output
           path: ./backup
+      - name: Download wrapper_amd64.zip
+        uses: actions/download-artifact@v4
+        with:
+          name: wrapper-amd64
+          path: ./
 
+      - name: Download wrapper_arm64.zip
+        uses: actions/download-artifact@v4
+        with:
+          name: wrapper-arm64
+          path: ./
         
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
