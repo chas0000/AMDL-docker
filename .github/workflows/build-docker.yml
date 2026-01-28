@@ -93,7 +93,8 @@ jobs:
         artifact_url=$(curl -s "https://api.github.com/repos/WorldObservationLog/wrapper/actions/runs/${run_id}/artifacts" \
          | jq -r '.artifacts[] | select(.name | contains("Wrapper.arm64")) | .archive_download_url')
         curl -L -H "Accept: application/vnd.github+json" "$artifact_url" -o ${GITHUB_WORKSPACE}/wrapper_arm64.zip
-        ls
+        unzip ${GITHUB_WORKSPACE}/wrapper_amd64.zip -d ${GITHUB_WORKSPACE}/output/wrapper_amd64
+        unzip ${GITHUB_WORKSPACE}/wrapper_arm64.zip -d ${GITHUB_WORKSPACE}/output/wrapper_arm64
         
         
         
@@ -116,19 +117,7 @@ jobs:
         path: |
           ${{ github.workspace }}/output
 
-    - name: Upload wrapper_amd64.zip artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: wrapper-amd64
-        path: |
-          ${{ github.workspace }}/wrapper_amd64.zip
-          
-    - name: Upload wrapper_arm64.zip artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: wrapper-arm64
-        path: |
-          ${{ github.workspace }}/wrapper_arm64.zip
+
           
     - name: Upload Go build artifacts
       uses: actions/upload-artifact@v4
