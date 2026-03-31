@@ -26,6 +26,9 @@ done
 cd /app/wrapper
 ./wm_server  &
 cd /app
+./sdl --server --port 3000 &
+cd /app
+
 
 # ===============================
 # 设置 tmux socket 目录
