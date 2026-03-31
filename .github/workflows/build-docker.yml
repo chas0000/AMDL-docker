@@ -91,21 +91,21 @@ jobs:
         curl -L "$amd64_url" -o ${GITHUB_WORKSPACE}/wrapper_amd64.zip
         # 1️⃣ 获取 Build for arm64 workflow ID
         workflow_id=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
-            https://api.github.com/repos/WorldObservationLog/wrapper/actions/workflows \
+            https://api.github.com/repos/chas0000/wrapper/actions/workflows \
             | jq -r '.workflows[] | select(.name=="Build for arm64") | .id')
 
         echo "Workflow ID: $workflow_id"
 
         # 2️⃣ 获取最新成功 run ID
         run_id=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
-            "https://api.github.com/repos/WorldObservationLog/wrapper/actions/workflows/${workflow_id}/runs?status=success&per_page=1" \
+            "https://api.github.com/repos/chas0000/wrapper/actions/workflows/${workflow_id}/runs?status=success&per_page=1" \
             | jq -r '.workflow_runs[0].id')
 
         echo "Latest run ID: $run_id"
 
         # 3️⃣ 获取 artifact 的下载 API URL
         artifact_url=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
-            "https://api.github.com/repos/WorldObservationLog/wrapper/actions/runs/${run_id}/artifacts" \
+            "https://api.github.com/repos/chas0000/wrapper/actions/runs/${run_id}/artifacts" \
             | jq -r '.artifacts[] | select(.name | contains("Wrapper.arm64")) | .archive_download_url')
 
         echo "Artifact API URL: $artifact_url"
