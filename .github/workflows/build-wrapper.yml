@@ -110,6 +110,8 @@ jobs:
             ghcr.io/${{ github.actor }}/amdl_wrapper:test-${{ env.BUILD_DATE }}
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/amdl_wrapper:cache
           cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/amdl_wrapper:cache,mode=max
+          build-args: |
+            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Summary
         run: |

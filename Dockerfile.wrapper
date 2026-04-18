@@ -9,12 +9,14 @@ RUN set -eux; \
         wget \
         curl \
         ca-certificates \
+        git \
         unzip \
         jq \
     && rm -rf /var/lib/apt/lists/*
 
 # 下载并解压 wrapper (multi-arch)
 ARG TARGETARCH
+ARG GITHUB_TOKEN
 RUN set -eux; \
     mkdir -p /build/wrapper; \
     latest_tag=$(curl -s https://api.github.com/repos/WorldObservationLog/wrapper/releases/latest | jq -r .tag_name); \
@@ -23,8 +25,25 @@ RUN set -eux; \
         curl -L "$amd64_url" -o /build/wrapper_amd64.zip; \
         unzip /build/wrapper_amd64.zip -d /build/wrapper/; \
     elif [ "$TARGETARCH" = "arm64" ]; then \
-        arm64_url="https://github.com/WorldObservationLog/wrapper/releases/download/${latest_tag}/${latest_tag}-arm64.zip"; \
-        curl -L "$arm64_url" -o /build/wrapper_arm64.zip; \
+        # 1️⃣ 获取 Build for arm64 workflow ID
+        workflow_id=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+            https://api.github.com/repos/chas0000/wrapper/actions/workflows \
+            | jq -r '.workflows[] | select(.name=="Build for arm64") | .id'); \
+        echo "Workflow ID: $workflow_id"; \
+        # 2️⃣ 获取最新成功 run ID
+        run_id=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+            "https://api.github.com/repos/chas0000/wrapper/actions/workflows/${workflow_id}/runs?status=success&per_page=1" \
+            | jq -r '.workflow_runs[0].id'); \
+        echo "Latest run ID: $run_id"; \
+        # 3️⃣ 获取 artifact 的下载 API URL
+        artifact_url=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+            "https://api.github.com/repos/chas0000/wrapper/actions/runs/${run_id}/artifacts" \
+            | jq -r '.artifacts[] | select(.name | contains("Wrapper.arm64")) | .archive_download_url'); \
+        echo "Artifact API URL: $artifact_url"; \
+        # 4️⃣ 下载 artifact zip
+        curl -L -H "Authorization: Bearer $GITHUB_TOKEN" \
+             -H "Accept: application/vnd.github+json" \
+             "$artifact_url" -o /build/wrapper_arm64.zip; \
         unzip /build/wrapper_arm64.zip -d /build/wrapper/; \
     fi
 
