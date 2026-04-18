@@ -60,7 +60,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: wrapper-output
-          path: ./output
+          path: ./
+
+      - name: Verify files
+        run: |
+          echo "=== Output directory ==="
+          ls -la ./output/ || echo "output dir not found"
+          echo "=== Backup directory ==="
+          ls -la ./backup/ || echo "backup dir not found"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
