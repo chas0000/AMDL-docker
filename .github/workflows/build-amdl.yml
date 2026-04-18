@@ -76,29 +76,13 @@ jobs:
     - name: List output files
       run: |
         ls -lR ${GITHUB_WORKSPACE}/output
-    - name: Move files    
-      run: |
-        ls -lR ${GITHUB_WORKSPACE}/output
-        mkdir -p ${GITHUB_WORKSPACE}/backup/
-        mv ${GITHUB_WORKSPACE}/output/config.yaml ${GITHUB_WORKSPACE}/backup/config.yaml
-        mv ${GITHUB_WORKSPACE}/output/sky_config.yaml ${GITHUB_WORKSPACE}/backup/sky_config.yaml
-        ls -l ${GITHUB_WORKSPACE}/backup
-  
+
     - name: Upload AMDL artifacts
       uses: actions/upload-artifact@v4
       with:
         name: amdl-output
         path: |
           ${{ github.workspace }}/output
-
-
-          
-    - name: Upload Go build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: config-output
-        path: |
-          ${{ github.workspace }}/backup
 
     - name: Create release archives
       run: |
@@ -132,6 +116,14 @@ jobs:
         name: release-archives
         path: |
           ${{ github.workspace }}/release/*.tar.gz
+
+    - name: Move files    
+      run: |
+        ls -lR ${GITHUB_WORKSPACE}/output
+        mkdir -p ${GITHUB_WORKSPACE}/backup/
+        mv ${GITHUB_WORKSPACE}/output/config.yaml ${GITHUB_WORKSPACE}/backup/config.yaml
+        mv ${GITHUB_WORKSPACE}/output/sky_config.yaml ${GITHUB_WORKSPACE}/backup/sky_config.yaml
+        ls -l ${GITHUB_WORKSPACE}/backup
 
 
    # 构建 amd64 镜像
