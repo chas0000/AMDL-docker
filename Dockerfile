@@ -1,5 +1,5 @@
-# 使用 wrapper 基础镜像
-FROM chaslllll/amdl_wrapper:latest AS wrapper-base
+# 使用 wrapper 基础镜像 (测试版)
+FROM chaslllll/amdl_wrapper:test AS wrapper-base
 
 # 主构建阶段
 FROM ubuntu:22.04

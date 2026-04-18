@@ -50,21 +50,21 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/amdl_wrapper:latest
-            ${{ secrets.DOCKER_USERNAME }}/amdl_wrapper:${{ env.BUILD_DATE }}
-            ghcr.io/${{ github.actor }}/amdl_wrapper:latest
-            ghcr.io/${{ github.actor }}/amdl_wrapper:${{ env.BUILD_DATE }}
+            ${{ secrets.DOCKER_USERNAME }}/amdl_wrapper:test
+            ${{ secrets.DOCKER_USERNAME }}/amdl_wrapper:test-${{ env.BUILD_DATE }}
+            ghcr.io/${{ github.actor }}/amdl_wrapper:test
+            ghcr.io/${{ github.actor }}/amdl_wrapper:test-${{ env.BUILD_DATE }}
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/amdl_wrapper:cache
           cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/amdl_wrapper:cache,mode=max
 
       - name: Build Summary
         run: |
-          echo "## ✅ Wrapper 基础镜像构建成功" >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ Wrapper 基础镜像构建成功 (测试版)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**构建时间**: ${{ env.BUILD_DATE }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**镜像标签**:" >> $GITHUB_STEP_SUMMARY
-          echo "- \`chaslllll/amdl_wrapper:latest\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`chaslllll/amdl_wrapper:${{ env.BUILD_DATE }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`ghcr.io/${{ github.actor }}/amdl_wrapper:latest\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`ghcr.io/${{ github.actor }}/amdl_wrapper:${{ env.BUILD_DATE }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**镜像标签 (测试版)**:" >> $GITHUB_STEP_SUMMARY
+          echo "- \`chaslllll/amdl_wrapper:test\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`chaslllll/amdl_wrapper:test-${{ env.BUILD_DATE }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ghcr.io/${{ github.actor }}/amdl_wrapper:test\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ghcr.io/${{ github.actor }}/amdl_wrapper:test-${{ env.BUILD_DATE }}\`" >> $GITHUB_STEP_SUMMARY
