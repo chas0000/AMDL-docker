@@ -125,6 +125,13 @@ jobs:
         mv ${GITHUB_WORKSPACE}/output/sky_config.yaml ${GITHUB_WORKSPACE}/backup/sky_config.yaml
         ls -l ${GITHUB_WORKSPACE}/backup
 
+    - name: Upload config artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: config-output
+        path: |
+          ${{ github.workspace }}/backup
+
 
    # 构建 amd64 镜像
   build-amd64:
