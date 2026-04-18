@@ -3,7 +3,7 @@ name: 构建主应用镜像
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [ main, feature/split-docker-workflows ]
     paths:
       - 'Dockerfile'
       - 'start.sh'

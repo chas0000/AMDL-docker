@@ -3,7 +3,7 @@ name: 构建 Wrapper 基础镜像
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [ main, feature/split-docker-workflows ]
     paths:
       - 'Dockerfile.wrapper'
       - '.github/workflows/build-wrapper.yml'
