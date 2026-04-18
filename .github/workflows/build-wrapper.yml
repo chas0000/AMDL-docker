@@ -9,11 +9,58 @@ on:
       - '.github/workflows/build-wrapper.yml'
 
 jobs:
-  build-wrapper-base:
+  pre-build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up Go
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget curl git make build-essential bash zlib1g-dev ca-certificates
+          wget https://golang.org/dl/go1.23.9.linux-amd64.tar.gz
+          sudo tar -C /usr/local -xvzf go1.23.9.linux-amd64.tar.gz
+          echo "export PATH=\$PATH:/usr/local/go/bin" >> ~/.bashrc
+          source ~/.bashrc
+          go version
+
+      - name: Build wrapper-manager-v1 (multi-arch)
+        run: |
+          git clone --depth=1 https://github.com/sky8282/wrapper-manager-v1.git
+          cd wrapper-manager-v1
+          go mod init wrapper-manager
+          go mod tidy
+          mkdir -p ${GITHUB_WORKSPACE}/output
+          mkdir -p ${GITHUB_WORKSPACE}/backup
+          cp index.html ${GITHUB_WORKSPACE}/output/index.html
+          cp config.yaml ${GITHUB_WORKSPACE}/backup/wm_config.yaml
+          for ARCH in amd64 arm64; do
+            echo "==> Building wm_server for $ARCH"
+            CGO_ENABLED=0 GOOS=linux GOARCH=$ARCH go build -a -o wm_server-$ARCH main.go
+            mv wm_server-$ARCH ${GITHUB_WORKSPACE}/output/
+          done
+
+      - name: Upload wrapper artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wrapper-output
+          path: |
+            ${{ github.workspace }}/output
+            ${{ github.workspace }}/backup
+
+  build-wrapper-base:
+    needs: pre-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download wrapper artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: wrapper-output
+          path: ./output
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2

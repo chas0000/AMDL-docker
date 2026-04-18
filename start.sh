@@ -14,17 +14,7 @@ for f in config.yaml sky_config.yaml; do
     fi
     cp "/app/config/$f" "/app/$f"
 done
-for f in wm_config.yaml; do
-    if [ ! -f "/app/config/$f" ]; then
-        cp "/app/backup/$f" "/app/config/$f"
-    fi
-    cp "/app/config/$f" "/app/wrapper/config.yaml"
-done
 
-
-# 启动 wm_server
-cd /app/wrapper
-./wm_server  &
 cd /app
 ./sdl --server --port 3000 &
 cd /app

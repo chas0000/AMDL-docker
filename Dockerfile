@@ -1,16 +1,9 @@
-# 使用 wrapper 基础镜像 (测试版)
-FROM chaslllll/amdl_wrapper:test AS wrapper-base
-
-# 主构建阶段
 FROM ubuntu:22.04
 
 # 设置工作目录
 WORKDIR /app
 
-# 从 wrapper 基础镜像复制文件
-COPY --from=wrapper-base /app/wrapper /app/wrapper
-
-# 复制其他文件
+# 复制文件
 COPY ./start.sh /app2/
 COPY ./backup/ /app/backup/
 
@@ -59,7 +52,7 @@ RUN set -eux; \
     apt-get purge -y g++ make cmake git wget curl; \
     apt-get autoremove -y
 
-# 根据架构选择二进制文件(仅处理 dl/sdl/ttyd)
+# 根据架构选择二进制文件
 RUN set -eux; \
     ARCH=$(dpkg --print-architecture); \
     ls /app; \
@@ -75,7 +68,7 @@ RUN set -eux; \
         *) echo "❌ 不支持的架构: $TARGETARCH" && exit 1 ;; \
     esac; \
     rm -rf /app/output; \
-    chmod 755 /app/wrapper/wm_server /usr/local/bin/ttyd /app/dl /app/sdl; \
+    chmod 755 /usr/local/bin/ttyd /app/dl /app/sdl; \
     ln -sf /app/dl /usr/local/bin/dl; \
     ln -sf /app/sdl /usr/local/bin/sdl
 
