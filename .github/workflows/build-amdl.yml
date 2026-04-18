@@ -100,6 +100,39 @@ jobs:
         path: |
           ${{ github.workspace }}/backup
 
+    - name: Create release archives
+      run: |
+        set -eux
+        mkdir -p ${GITHUB_WORKSPACE}/release
+        
+        # 创建 amd64 架构包
+        mkdir -p ${GITHUB_WORKSPACE}/release/amdl-amd64
+        cp ${GITHUB_WORKSPACE}/output/dl-amd64 ${GITHUB_WORKSPACE}/release/amdl-amd64/dl
+        cp ${GITHUB_WORKSPACE}/output/sdl-amd64 ${GITHUB_WORKSPACE}/release/amdl-amd64/sdl
+        cp ${GITHUB_WORKSPACE}/output/config.yaml ${GITHUB_WORKSPACE}/release/amdl-amd64/config.yaml
+        cp ${GITHUB_WORKSPACE}/output/sky_config.yaml ${GITHUB_WORKSPACE}/release/amdl-amd64/sky_config.yaml
+        cd ${GITHUB_WORKSPACE}/release
+        tar czf amdl-amd64.tar.gz amdl-amd64/
+        
+        # 创建 arm64 架构包
+        mkdir -p ${GITHUB_WORKSPACE}/release/amdl-arm64
+        cp ${GITHUB_WORKSPACE}/output/dl-arm64 ${GITHUB_WORKSPACE}/release/amdl-arm64/dl
+        cp ${GITHUB_WORKSPACE}/output/sdl-arm64 ${GITHUB_WORKSPACE}/release/amdl-arm64/sdl
+        cp ${GITHUB_WORKSPACE}/output/config.yaml ${GITHUB_WORKSPACE}/release/amdl-arm64/config.yaml
+        cp ${GITHUB_WORKSPACE}/output/sky_config.yaml ${GITHUB_WORKSPACE}/release/amdl-arm64/sky_config.yaml
+        cd ${GITHUB_WORKSPACE}/release
+        tar czf amdl-arm64.tar.gz amdl-arm64/
+        
+        echo "Release archives created:"
+        ls -lh ${GITHUB_WORKSPACE}/release/*.tar.gz
+
+    - name: Upload release archives
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-archives
+        path: |
+          ${{ github.workspace }}/release/*.tar.gz
+
 
    # 构建 amd64 镜像
   build-amd64:
@@ -266,3 +299,58 @@ jobs:
           echo "- \`ghcr.io/${{ github.actor }}/amdl_m:test\`" >> $GITHUB_STEP_SUMMARY
           echo "- \`ghcr.io/${{ github.actor }}/amdl_m:test-amd64-${{ needs.build-amd64.outputs.build_date }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- \`ghcr.io/${{ github.actor }}/amdl_m:test-arm64-${{ needs.build-arm64.outputs.build_date }}\`" >> $GITHUB_STEP_SUMMARY
+
+  # 创建 GitHub Release
+  create-release:
+    runs-on: ubuntu-latest
+    needs: [pre-build, create-multiarch]
+    if: github.ref == 'refs/heads/main'  # 只在 main 分支创建 Release
+    steps:
+      - name: Download release archives
+        uses: actions/download-artifact@v4
+        with:
+          name: release-archives
+          path: ./release
+
+      - name: Generate release tag
+        id: tag
+        run: |
+          export TZ='Asia/Shanghai'
+          RELEASE_TAG="v$(date +'%Y%m%d%H%M')"
+          echo "tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
+          echo "Release tag: $RELEASE_TAG"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: AMDL Release ${{ steps.tag.outputs.tag }}
+          body: |
+            ## AMDL Binary Release
+            
+            ### 包含内容
+            - dl: apple-music-downloader (zhaarey 版本)
+            - sdl: apple-music-downloader (sky8282 多线版本)
+            - config.yaml: dl 的配置文件
+            - sky_config.yaml: sdl 的配置文件
+            
+            ### 架构
+            - amdl-amd64.tar.gz: amd64 架构
+            - amdl-arm64.tar.gz: arm64 架构
+            
+            ### 使用方法
+            ```bash
+            # 解压
+            tar xzf amdl-amd64.tar.gz  # 或 amdl-arm64.tar.gz
+            cd amdl-amd64  # 或 amdl-arm64
+            
+            # 运行
+            ./dl    # zhaarey 版本
+            ./sdl   # sky8282 多线版本
+            ```
+          files: |
+            ./release/*.tar.gz
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
