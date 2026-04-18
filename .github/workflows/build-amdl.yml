@@ -2,7 +2,15 @@ name: 构建主应用镜像
 
 on:
   workflow_dispatch:
-
+  push:
+    branches: [ main, feature/split-docker-workflows ]
+    paths:
+      - 'Dockerfile'
+      - 'start.sh'
+      - 'shell_web.go'
+      - '.github/workflows/build-amdl.yml'
+      - 'output/**'
+      - 'backup/**'
 
 jobs:
   pre-build:
