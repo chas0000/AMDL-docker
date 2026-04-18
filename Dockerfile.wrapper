@@ -1,0 +1,48 @@
+FROM ubuntu:22.04 AS builder
+
+# 设置工作目录
+WORKDIR /build
+
+# 安装构建依赖
+RUN set -eux; \
+    apt-get update && apt-get install -y --no-install-recommends \
+        wget \
+        curl \
+        ca-certificates \
+        git \
+        unzip \
+        jq \
+    && rm -rf /var/lib/apt/lists/*
+
+# 下载 wrapper (multi-arch)
+ARG TARGETARCH
+RUN set -eux; \
+    mkdir -p /build/wrapper; \
+    latest_tag=$(curl -s https://api.github.com/repos/WorldObservationLog/wrapper/releases/latest | jq -r .tag_name); \
+    if [ "$TARGETARCH" = "amd64" ]; then \
+        amd64_url="https://github.com/WorldObservationLog/wrapper/releases/download/${latest_tag}/${latest_tag}.zip"; \
+        curl -L "$amd64_url" -o /build/wrapper_amd64.zip; \
+        unzip /build/wrapper_amd64.zip -d /build/wrapper/; \
+    elif [ "$TARGETARCH" = "arm64" ]; then \
+        arm64_url="https://github.com/WorldObservationLog/wrapper/releases/download/${latest_tag}/${latest_tag}-arm64.zip"; \
+        curl -L "$arm64_url" -o /build/wrapper_arm64.zip; \
+        unzip /build/wrapper_arm64.zip -d /build/wrapper/; \
+    fi
+
+# 最终镜像
+FROM ubuntu:22.04
+
+# 从 builder 阶段复制 wrapper 文件
+COPY --from=builder /build/wrapper /app/wrapper
+
+# 设置工作目录
+WORKDIR /app
+
+# 环境变量
+ENV TTYD_USER=""
+ENV TTYD_PASS=""
+
+# 暴露端口
+EXPOSE 8080
+
+CMD ["/bin/bash"]

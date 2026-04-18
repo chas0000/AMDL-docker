@@ -1,11 +1,17 @@
+# 使用 wrapper 基础镜像
+FROM chaslllll/amdl_wrapper:latest AS wrapper-base
+
+# 主构建阶段
 FROM ubuntu:22.04
 
 # 设置工作目录
 WORKDIR /app
 
-# 复制文件
+# 从 wrapper 基础镜像复制文件
+COPY --from=wrapper-base /app/wrapper /app/wrapper
+
+# 复制其他文件
 COPY ./start.sh /app2/
-COPY ./output/ /app/output/
 COPY ./backup/ /app/backup/
 
 # 安装基础依赖
@@ -53,26 +59,18 @@ RUN set -eux; \
     apt-get purge -y g++ make cmake git wget curl; \
     apt-get autoremove -y
 
-# 根据架构选择二进制文件
+# 根据架构选择二进制文件(仅处理 dl/sdl/ttyd)
 RUN set -eux; \
     ARCH=$(dpkg --print-architecture); \
     ls /app; \
     case "$ARCH" in \
         amd64) \
-            mkdir -p /app/wrapper; \
             mv /app/output/dl-amd64 /app/dl; \
             mv /app/output/sdl-amd64 /app/sdl; \
-            cp -r /app/output/wrapper_amd64/* /app/wrapper/; \
-            mv /app/output/wm_server-amd64 /app/wrapper/wm_server; \
-            mv /app/output/index.html /app/wrapper/index.html; \
             mv /app/output/ttyd-amd64 /usr/local/bin/ttyd ;; \
         arm64) \
-            mkdir -p /app/wrapper; \
             mv /app/output/dl-arm64 /app/dl; \
             mv /app/output/sdl-arm64 /app/sdl; \
-            cp -r /app/output/wrapper_arm64/* /app/wrapper/; \
-            mv /app/output/wm_server-arm64 /app/wrapper/wm_server; \
-            mv /app/output/index.html /app/wrapper/index.html; \
             mv /app/output/ttyd-arm64 /usr/local/bin/ttyd ;; \
         *) echo "❌ 不支持的架构: $TARGETARCH" && exit 1 ;; \
     esac; \

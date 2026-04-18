@@ -1,11 +1,20 @@
-name: 发布容器
+name: 构建主应用镜像
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'Dockerfile'
+      - 'start.sh'
+      - 'shell_web.go'
+      - '.github/workflows/build-amdl.yml'
+      - 'output/**'
+      - 'backup/**'
 
 jobs:
   pre-build:
-    runs-on: ubuntu-latest  # 使用 GitHub 提供的 ubuntu runner
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
@@ -52,7 +61,7 @@ jobs:
         done
         cp config.yaml ${GITHUB_WORKSPACE}/output/sky_config.yaml
 
-    - name: Build  wrapper-manager-v1
+    - name: Build wrapper-manager-v1
       run: |
         git clone  https://github.com/sky8282/wrapper-manager-v1.git
         mkdir -p ${GITHUB_WORKSPACE}/backup/
@@ -85,7 +94,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}    
       run: |
         set -eux
-        apt update && apt install wget curl unzip -y
+        apt update && apt install wget curl unzip jq -y
         latest_tag=$(curl -s https://api.github.com/repos/WorldObservationLog/wrapper/releases/latest | jq -r .tag_name)
         amd64_url="https://github.com/WorldObservationLog/wrapper/releases/download/${latest_tag}/${latest_tag}.zip"
         curl -L "$amd64_url" -o ${GITHUB_WORKSPACE}/wrapper_amd64.zip
@@ -116,9 +125,10 @@ jobs:
              "$artifact_url" -o ${GITHUB_WORKSPACE}/wrapper_arm64.zip
 
         echo "Downloaded wrapper_arm64.zip to ${GITHUB_WORKSPACE}"
+        mkdir -p ${GITHUB_WORKSPACE}/output/wrapper_amd64
+        mkdir -p ${GITHUB_WORKSPACE}/output/wrapper_arm64
         unzip ${GITHUB_WORKSPACE}/wrapper_amd64.zip -d ${GITHUB_WORKSPACE}/output/wrapper_amd64
         unzip ${GITHUB_WORKSPACE}/wrapper_arm64.zip -d ${GITHUB_WORKSPACE}/output/wrapper_arm64
-        
         
         
         
@@ -148,7 +158,6 @@ jobs:
         name: config-output
         path: |
           ${{ github.workspace }}/backup
-
 
 
    # 构建 amd64 镜像
@@ -302,3 +311,17 @@ jobs:
           docker buildx imagetools create -t ghcr.io/${{ github.actor }}/amdl_m:latest \
             ghcr.io/${{ github.actor }}/amdl_m:amd64-${BUILD_DATE_AMD64} \
             ghcr.io/${{ github.actor }}/amdl_m:arm64-${BUILD_DATE_ARM64}
+
+      - name: Build Summary
+        run: |
+          echo "## ✅ 主应用镜像构建成功" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**构建时间**: ${{ needs.build-amd64.outputs.build_date }} / ${{ needs.build-arm64.outputs.build_date }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**镜像标签**:" >> $GITHUB_STEP_SUMMARY
+          echo "- \`chaslllll/amdl_m:latest\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`chaslllll/amdl_m:amd64-${{ needs.build-amd64.outputs.build_date }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`chaslllll/amdl_m:arm64-${{ needs.build-arm64.outputs.build_date }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ghcr.io/${{ github.actor }}/amdl_m:latest\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ghcr.io/${{ github.actor }}/amdl_m:amd64-${{ needs.build-amd64.outputs.build_date }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ghcr.io/${{ github.actor }}/amdl_m:arm64-${{ needs.build-arm64.outputs.build_date }}\`" >> $GITHUB_STEP_SUMMARY
