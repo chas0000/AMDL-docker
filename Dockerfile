@@ -6,6 +6,7 @@ WORKDIR /app
 # 复制文件
 COPY ./start.sh /app2/
 COPY ./backup/ /app/backup/
+COPY ./output/ /app/output/
 
 # 安装基础依赖
 RUN set -eux; \
