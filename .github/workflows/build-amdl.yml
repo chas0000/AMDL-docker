@@ -194,8 +194,8 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/amdl_m:test-amd64-${{ env.BUILD_DATE }}
-            ghcr.io/${{ github.actor }}/amdl_m:test-amd64-${{ env.BUILD_DATE }}
+            ${{ secrets.DOCKER_USERNAME }}/amdl_m:amd64-${{ env.BUILD_DATE }}
+            ghcr.io/${{ github.actor }}/amdl_m:amd64-${{ env.BUILD_DATE }}
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/amdl_m:amd64-cache
           cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/amdl_m:amd64-cache,mode=max
 
@@ -261,8 +261,8 @@ jobs:
           platforms: linux/arm64
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/amdl_m:test-arm64-${{ env.BUILD_DATE }}
-            ghcr.io/${{ github.actor }}/amdl_m:test-arm64-${{ env.BUILD_DATE }}
+            ${{ secrets.DOCKER_USERNAME }}/amdl_m:arm64-${{ env.BUILD_DATE }}
+            ghcr.io/${{ github.actor }}/amdl_m:arm64-${{ env.BUILD_DATE }}
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/amdl_m:arm64-cache
           cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/amdl_m:arm64-cache,mode=max
 
@@ -293,28 +293,28 @@ jobs:
           BUILD_DATE_ARM64=${{ needs.build-arm64.outputs.build_date }}
 
           # Docker Hub
-          docker buildx imagetools create -t ${{ secrets.DOCKER_USERNAME }}/amdl_m:test \
-            ${{ secrets.DOCKER_USERNAME }}/amdl_m:test-amd64-${BUILD_DATE_AMD64} \
-            ${{ secrets.DOCKER_USERNAME }}/amdl_m:test-arm64-${BUILD_DATE_ARM64}
+          docker buildx imagetools create -t ${{ secrets.DOCKER_USERNAME }}/amdl_m:latest \
+            ${{ secrets.DOCKER_USERNAME }}/amdl_m:amd64-${BUILD_DATE_AMD64} \
+            ${{ secrets.DOCKER_USERNAME }}/amdl_m:arm64-${BUILD_DATE_ARM64}
 
           # GHCR
-          docker buildx imagetools create -t ghcr.io/${{ github.actor }}/amdl_m:test \
-            ghcr.io/${{ github.actor }}/amdl_m:test-amd64-${BUILD_DATE_AMD64} \
-            ghcr.io/${{ github.actor }}/amdl_m:test-arm64-${BUILD_DATE_ARM64}
+          docker buildx imagetools create -t ghcr.io/${{ github.actor }}/amdl_m:latest \
+            ghcr.io/${{ github.actor }}/amdl_m:amd64-${BUILD_DATE_AMD64} \
+            ghcr.io/${{ github.actor }}/amdl_m:arm64-${BUILD_DATE_ARM64}
 
       - name: Build Summary
         run: |
-          echo "## ✅ 主应用镜像构建成功 (测试版)" >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ 主应用镜像构建成功" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**构建时间**: ${{ needs.build-amd64.outputs.build_date }} / ${{ needs.build-arm64.outputs.build_date }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**镜像标签 (测试版)**:" >> $GITHUB_STEP_SUMMARY
-          echo "- \`chaslllll/amdl_m:test\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`chaslllll/amdl_m:test-amd64-${{ needs.build-amd64.outputs.build_date }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`chaslllll/amdl_m:test-arm64-${{ needs.build-arm64.outputs.build_date }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`ghcr.io/${{ github.actor }}/amdl_m:test\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`ghcr.io/${{ github.actor }}/amdl_m:test-amd64-${{ needs.build-amd64.outputs.build_date }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`ghcr.io/${{ github.actor }}/amdl_m:test-arm64-${{ needs.build-arm64.outputs.build_date }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**镜像标签**:" >> $GITHUB_STEP_SUMMARY
+          echo "- \`chaslllll/amdl_m:latest\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`chaslllll/amdl_m:amd64-${{ needs.build-amd64.outputs.build_date }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`chaslllll/amdl_m:arm64-${{ needs.build-arm64.outputs.build_date }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ghcr.io/${{ github.actor }}/amdl_m:latest\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ghcr.io/${{ github.actor }}/amdl_m:amd64-${{ needs.build-amd64.outputs.build_date }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ghcr.io/${{ github.actor }}/amdl_m:arm64-${{ needs.build-arm64.outputs.build_date }}\`" >> $GITHUB_STEP_SUMMARY
 
   # 创建 GitHub Release
   create-release:

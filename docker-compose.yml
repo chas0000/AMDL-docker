@@ -1,7 +1,7 @@
 services:
   wrapper:
     container_name: wrapper
-    image: ghcr.io/chas0000/amdl_wrapper:test  #或ghcr.io/chas0000/amdl_m:latest  chaslllll/amdl_m:latest
+    image: ghcr.io/chas0000/amdl_wrapper:latest  #或chaslllll/amdl_wrapper:latest
     network_mode: host
     #ports:
     #   - "8880:8080"     # 如果不使用 host 模式，可以使用端口映射 8080是管理端口，还要放行市里端口如10200、20200
@@ -10,7 +10,7 @@ services:
       - ./config/:/app/config/  
   amdl_m:
     container_name: amdl
-    image: ghcr.io/chas0000/amdl_m:test #或ghcr.io/chas0000/amdl_m:latest  chaslllll/amdl_m:latest
+    image: ghcr.io/chas0000/amdl_m:latest #或chaslllll/amdl_m:latest
     network_mode: host
     #environment:
     #  TTYD_USER: ""                  #TTYD的用户名和密码，两者都设定时才起效，否则为无鉴权模式
