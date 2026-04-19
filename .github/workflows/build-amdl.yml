@@ -82,7 +82,8 @@ jobs:
       with:
         name: amdl-output
         path: |
-          ${{ github.workspace }}/output
+          ${{ github.workspace }}/output/*
+        if-no-files-found: error
 
     - name: Create release archives
       run: |
@@ -147,12 +148,20 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: amdl-output
-          path: ./output
+          path: ./output/
+      
+      - name: Verify downloaded files
+        run: |
+          echo "=== Output directory ==="
+          ls -la ./output/ || echo "output dir not found"
+          echo "=== Backup directory ==="
+          ls -la ./backup/ || echo "backup dir not found"
+      
       - name: Download backup
         uses: actions/download-artifact@v4
         with:
           name: config-output
-          path: ./backup
+          path: ./backup/
         
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -203,12 +212,20 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: amdl-output
-          path: ./output
+          path: ./output/
+      
+      - name: Verify downloaded files
+        run: |
+          echo "=== Output directory ==="
+          ls -la ./output/ || echo "output dir not found"
+          echo "=== Backup directory ==="
+          ls -la ./backup/ || echo "backup dir not found"
+      
       - name: Download backup
         uses: actions/download-artifact@v4
         with:
           name: config-output
-          path: ./backup
+          path: ./backup/
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
