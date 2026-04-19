@@ -10,7 +10,8 @@ COPY ./output/ /app/output/
 
 # 安装基础依赖
 RUN set -eux; \
-    apt-get update && apt-get install -y --no-install-recommends \
+    apt-get update || (sleep 5 && apt-get update); \
+    apt-get install -y --no-install-recommends \
         nano \
         wget \
         curl \
@@ -23,9 +24,24 @@ RUN set -eux; \
         cmake \
         zlib1g-dev \
         coreutils \
-        iproute2  \
-        unzip  \
-    && rm -rf /var/lib/apt/lists/*
+        iproute2 \
+        unzip \
+    || (apt-get update && apt-get install -y --no-install-recommends \
+        nano \
+        wget \
+        curl \
+        ca-certificates \
+        git \
+        ffmpeg \
+        tmux \
+        g++ \
+        make \
+        cmake \
+        zlib1g-dev \
+        coreutils \
+        iproute2 \
+        unzip); \
+    rm -rf /var/lib/apt/lists/*
 
 # 构建 GPAC 和 Bento4
 RUN set -eux; \
