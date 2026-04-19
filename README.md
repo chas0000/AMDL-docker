@@ -8,13 +8,14 @@
 ~~由于二开项目越来越多，所以又改了一版，将wrapper排除，转为直接使用itouakirai大佬的~~，然后制作了amdl的编译，同时做了sky8282佬的多线程的编译
 攒来自用的一个docker镜像，只适用于内网x86软路由，对于外网使用的，推荐<https://github.com/akina-up/wrapper-amdl>  
 说明：  
-- 镜像基底：alpine:latest  
+- 镜像基底：ubuntu:22.04  
 - wrapper来源：~~<https://github.com/zhaarey/wrapper> ，未作改动；更换为：<https://github.com/WorldObservationLog/wrapper> ,具体更新了啥我也不清楚，无脑追新。~~ 直接使用 ghcr.io/itouakirai/wrapper:x86
 - apple-music-downloader 来源：<https://github.com/zhaarey/apple-music-downloader> ；未作改动,仅编译为二进制 dl
 - apple-music-downloader 来源2：<https://github.com/sky8282/apple-music-downloader> ；未作改动，仅编译为二进制 sdl  
 - mp4decrypt ~~来源：<https://www.bok.net/Bento4/binaries/Bento4-SDK-1-6-0-641.x86_64-unknown-linux.zip> ;未作mp4decrypt的自动获取新版本，有需求的可自行fork修改action。~~ 已添加编译
 - ~~已安装screen,如果需要其他screen配置，建议fork自己搞。~~
 - ~~配置ttyd，如需其他ttyd设置比如改端口加密码等，建议fork自己搞。~~  
+- **新增SSH服务支持**，可通过SSH直接连接到tmux session  
 
 使用简易说明：  
 - 1、建议使用compose方式管理，cli方式也可以，但是需要自己管理路径，以下说明均安装compose方式；  
@@ -39,5 +40,29 @@
 - 3、第一次wrapper登录，参照原方式：  
 打开ip:8080的wrapper-manager-v1界面登录wrapper；  
 打开ip:7681的下载页面输入dl -xxxxx命令或sdl -xxxx命令下载；
+
+## SSH访问功能
+
+本镜像现已支持通过SSH直接连接到tmux session：
+
+### SSH连接方式
+```bash
+ssh sshuser@your-container-ip
+# 默认密码: password
+```
+
+### 自定义SSH用户和密码
+在docker-compose.yml中设置环境变量：
+```yaml
+environment:
+  SSH_USER: "myuser"
+  SSH_PASSWORD: "mypassword"
+```
+
+### SSH特性
+- 连接后自动attach到amdl tmux session
+- 如果session不存在则自动创建
+- 支持密码认证登录
+- 默认暴露22端口（使用host网络模式时直接使用宿主机端口）
  
 本简易说明只针对技术小白，大佬们请自行修改使用  

@@ -48,8 +48,8 @@ jobs:
       run: |
         mkdir -p ./sky
         cd ${GITHUB_WORKSPACE}/sky
-        git clone https://github.com/chas0000/apple-music-downloader-muilt.git
-        cd ${GITHUB_WORKSPACE}/sky/apple-music-downloader-muilt
+        git clone https://github.com/sky8282/apple-music-downloader.git
+        cd ${GITHUB_WORKSPACE}/sky/apple-music-downloader
         sed -i 's|config.yaml|sky_config.yaml|g' ./main.go
         sed -i 's|config.yaml|sky_config.yaml|g' ./internal/core/state.go
         go mod tidy

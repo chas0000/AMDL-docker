@@ -5,6 +5,7 @@ WORKDIR /app
 
 # 复制文件
 COPY ./start.sh /app2/
+COPY ./.tmux.conf /app/config/.tmux.conf
 COPY ./backup/ /app/backup/
 COPY ./output/ /app/output/
 
@@ -26,6 +27,7 @@ RUN set -eux; \
         coreutils \
         iproute2 \
         unzip \
+        openssh-server \
     || (apt-get update && apt-get install -y --no-install-recommends \
         nano \
         wget \
@@ -40,7 +42,8 @@ RUN set -eux; \
         zlib1g-dev \
         coreutils \
         iproute2 \
-        unzip); \
+        unzip \
+        openssh-server); \
     rm -rf /var/lib/apt/lists/*
 
 # 构建 GPAC 和 Bento4
@@ -89,9 +92,17 @@ RUN set -eux; \
     ln -sf /app/dl /usr/local/bin/dl; \
     ln -sf /app/sdl /usr/local/bin/sdl
 
+# 创建SSH所需目录
+RUN mkdir -p /run/sshd
+
 # 环境变量
 ENV TTYD_USER=""
 ENV TTYD_PASS=""
+ENV SSH_USER="sshuser"
+ENV SSH_PASSWORD="password"
+
+# 暴露SSH端口
+EXPOSE 22
 
 # 默认启动命令
 CMD ["/bin/bash","/app2/start.sh"]

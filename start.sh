@@ -27,7 +27,7 @@ export TMUX_TMPDIR=/tmp/tmux
 mkdir -p "$TMUX_TMPDIR"
 chmod 700 "$TMUX_TMPDIR"
 
-SESSION_NAME=mysession
+SESSION_NAME=amdl
 
 # ===============================
 # 强制杀掉旧 tmux server（确保 -f 生效）
@@ -56,6 +56,64 @@ done
 
 # 清理可能的嵌套 tmux 环境
 unset TMUX
+
+# ===============================
+# 配置并启动 SSH 服务
+# ===============================
+echo "[INFO] Configuring SSH service..."
+
+# 设置SSH用户密码（从环境变量获取）
+if [ -n "$SSH_USER" ] && [ -n "$SSH_PASSWORD" ]; then
+    # 如果用户指定了用户名且不是root，则创建该用户
+    if [ "$SSH_USER" != "root" ]; then
+        if ! id "$SSH_USER" &>/dev/null; then
+            useradd -m -s /usr/local/bin/tmux-shell "$SSH_USER"
+        fi
+    fi
+    echo "${SSH_USER}:${SSH_PASSWORD}" | chpasswd
+else
+    # 如果没有设置环境变量，则使用默认的sshuser账户
+    if ! id "sshuser" &>/dev/null; then
+        useradd -m -s /usr/local/bin/tmux-shell sshuser
+    fi
+    echo 'sshuser:password' | chpasswd
+fi
+
+# 配置SSH允许密码认证和密码登录
+sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
+sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config
+sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+
+# 创建SSH登录脚本，直接attach到tmux session
+cat > /usr/local/bin/tmux-shell << 'EOF'
+#!/bin/bash
+# 如果已经在tmux会话中，则直接启动bash
+if [ -n "$TMUX" ]; then
+    exec bash
+fi
+
+# 否则尝试attach到amdl会话，如果不存在则创建
+SESSION_NAME="amdl"
+if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+    exec tmux attach -t "$SESSION_NAME"
+else
+    exec tmux new-session -s "$SESSION_NAME"
+fi
+EOF
+
+chmod +x /usr/local/bin/tmux-shell
+
+# 将tmux-shell设置为默认shell（针对特定用户）
+if id "$SSH_USER" &>/dev/null && [ "$SSH_USER" != "root" ]; then
+    chsh -s /usr/local/bin/tmux-shell "$SSH_USER" 2>/dev/null || true
+elif [ "$SSH_USER" = "root" ]; then
+    # 如果是root用户，我们仍然希望使用tmux-shell作为交互式shell
+    echo '[INFO] Root user will use tmux-shell for interactive sessions'
+fi
+
+# 启动SSH服务
+echo "[INFO] Starting SSH service..."
+/usr/sbin/sshd -D &
 
 # ===============================
 # 启动 ttyd 并 attach tmux session
