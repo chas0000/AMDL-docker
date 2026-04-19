@@ -7,6 +7,7 @@ on:
     paths:
       - 'Dockerfile.wrapper'
       - '.github/workflows/build-wrapper.yml'
+      - 'wrapper_start.sh'
 
 jobs:
   pre-build:
