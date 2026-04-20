@@ -7,6 +7,7 @@ on:
     paths:
       - 'Dockerfile'
       - 'start.sh'
+      - '.tmux.conf'
       - 'shell_web.go'
       - '.github/workflows/build-amdl.yml'
       - 'output/**'
