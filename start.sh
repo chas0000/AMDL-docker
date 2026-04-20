@@ -23,10 +23,8 @@ cd /app
 # ===============================
 # 设置 tmux socket 目录
 # ===============================
-export TMUX_TMPDIR=/tmp/tmux
-mkdir -p "$TMUX_TMPDIR"
-chmod 700 "$TMUX_TMPDIR"
-
+# 不使用自定义TMUX_TMPDIR，让tmux使用默认路径 /tmp/tmux-<uid>/
+# 但需要确保 /tmp 目录权限正确
 SESSION_NAME=amdl
 
 # ===============================
@@ -41,10 +39,10 @@ TMUX_CONF="/app/config/.tmux.conf"
 
 if [ -f "$TMUX_CONF" ]; then
     echo "[INFO] Creating tmux session $SESSION_NAME with custom config..."
-    tmux -f "$TMUX_CONF" new-session -d -s "$SESSION_NAME" "bash"
+    tmux -f "$TMUX_CONF" new-session -d -s "$SESSION_NAME" -c /app "bash"
 else
     echo "[INFO] Creating tmux session $SESSION_NAME with default config..."
-    tmux new-session -d -s "$SESSION_NAME" "bash"
+    tmux new-session -d -s "$SESSION_NAME" -c /app "bash"
 fi
 
 # ===============================
@@ -88,38 +86,49 @@ sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_c
 sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
 sed -i 's/PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config
 
-# 启用SFTP子系统（如果未启用）
-if ! grep -q "^Subsystem sftp" /etc/ssh/sshd_config; then
-    echo "Subsystem sftp /usr/lib/openssh/sftp-server" >> /etc/ssh/sshd_config
-    echo "[INFO] SFTP subsystem enabled"
-else
-    echo "[INFO] SFTP subsystem already configured"
-fi
 
 # 配置SSH端口
 if [ -n "$SSH_PORT" ] && [ "$SSH_PORT" != "22" ]; then
     # 如果指定了非默认端口，修改sshd_config
-    sed -i "s/#Port 22/Port $SSH_PORT/" /etc/ssh/sshd_config
-    sed -i "s/^Port 22$/Port $SSH_PORT/" /etc/ssh/sshd_config
+    if grep -q "^#Port 22" /etc/ssh/sshd_config; then
+        # 如果有注释的Port行，取消注释并修改
+        sed -i "s/^#Port 22/Port $SSH_PORT/" /etc/ssh/sshd_config
+    elif grep -q "^Port " /etc/ssh/sshd_config; then
+        # 如果已有Port配置，直接替换
+        sed -i "s/^Port .*/Port $SSH_PORT/" /etc/ssh/sshd_config
+    else
+        # 如果没有Port配置，在文件开头添加
+        sed -i "1i Port $SSH_PORT" /etc/ssh/sshd_config
+    fi
     echo "[INFO] SSH port set to $SSH_PORT"
 else
     echo "[INFO] Using default SSH port 22"
 fi
 
-# 创建SSH登录脚本，直接attach到tmux session
+# 创建SSH登录脚本，直接attach到tmux session（仅用于非root用户）
 cat > /usr/local/bin/tmux-shell << 'EOF'
 #!/bin/bash
-# 如果已经在tmux会话中，则直接启动bash
-if [ -n "$TMUX" ]; then
-    exec bash
-fi
 
-# 否则尝试attach到amdl会话，如果不存在则创建
-SESSION_NAME="amdl"
-if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
-    exec tmux attach -t "$SESSION_NAME"
+# 检查是否为交互式shell（有终端）
+# SFTP/SCP等非交互式连接不会有tty
+if [ -t 0 ]; then
+    # 交互式shell，进入tmux
+    
+    # 如果已经在tmux会话中，则直接启动bash
+    if [ -n "$TMUX" ]; then
+        exec bash
+    fi
+
+    # 否则尝试attach到amdl会话，如果不存在则创建
+    SESSION_NAME="amdl"
+    if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+        exec tmux attach -t "$SESSION_NAME"
+    else
+        exec tmux new-session -s "$SESSION_NAME"
+    fi
 else
-    exec tmux new-session -s "$SESSION_NAME"
+    # 非交互式shell（SFTP/SCP等），直接启动bash
+    exec bash
 fi
 EOF
 
@@ -128,26 +137,71 @@ chmod +x /usr/local/bin/tmux-shell
 # 将tmux-shell设置为默认shell（针对特定用户）
 if id "$SSH_USER" &>/dev/null && [ "$SSH_USER" != "root" ]; then
     chsh -s /usr/local/bin/tmux-shell "$SSH_USER" 2>/dev/null || true
+    echo "[INFO] Set shell for user '$SSH_USER' to tmux-shell"
 elif [ "$SSH_USER" = "root" ]; then
-    # 如果是root用户，我们仍然希望使用tmux-shell作为交互式shell
-    echo '[INFO] Root user will use tmux-shell for interactive sessions'
+    # 如果是root用户，修改家目录为/app，并配置tmux auto-attach
+    
+    # 修改root的家目录为/app
+    sed -i 's|^root:x:0:0:root:/root:|root:x:0:0:root:/app:|' /etc/passwd
+    
+    # 创建通用的tmux attach脚本
+    TMUX_ATTACH_SCRIPT='
+# Auto attach to tmux session if not already in tmux and has tty
+if [ -z "$TMUX" ] && [ -t 0 ] && [ -z "$SSH_TMUX_AUTO_ATTACHED" ]; then
+    SESSION_NAME="amdl"
+    export SSH_TMUX_AUTO_ATTACHED=1
+    
+    if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+        tmux attach -t "$SESSION_NAME"
+    else
+        tmux new-session -d -s "$SESSION_NAME" -c /app
+        tmux attach -t "$SESSION_NAME"
+    fi
+    exit 0
+fi
+'
+    
+    # 添加到 .bashrc
+    echo "$TMUX_ATTACH_SCRIPT" >> /root/.bashrc
+    
+    # 添加到 .profile (login shell 会读取)
+    echo "$TMUX_ATTACH_SCRIPT" >> /root/.profile
+    
+    # 如果 .bash_profile 存在，也添加
+    if [ -f /root/.bash_profile ]; then
+        echo "$TMUX_ATTACH_SCRIPT" >> /root/.bash_profile
+    else
+        # 否则创建 .bash_profile 并让它 sourcing .profile
+        echo '[ -f ~/.profile ] && . ~/.profile' > /root/.bash_profile
+    fi
+    
+    echo "[INFO] Set root home to /app and added auto tmux attach"
 fi
 
 # 启动SSH服务
 echo "[INFO] Starting SSH service..."
-/usr/sbin/sshd -D &
+# 先生成主机密钥（如果不存在）
+if [ ! -f /etc/ssh/ssh_host_rsa_key ]; then
+    ssh-keygen -A
+fi
+# 以守护进程方式启动sshd
+/usr/sbin/sshd
+echo "[INFO] SSH service started"
 
 # ===============================
 # 启动 ttyd 并 attach tmux session
 # ===============================
+echo "[INFO] Starting ttyd, connecting to tmux session: $SESSION_NAME"
+
+# tmux会使用TMUX_TMPDIR环境变量找到正确的socket
 TTYD_CMD="tmux attach -t $SESSION_NAME"
 
 if [ -n "$TTYD_USER" ] && [ -n "$TTYD_PASS" ]; then
     echo "[INFO] Starting ttyd with auth..."
-    exec ttyd -W env LANG=zh_CN.UTF-8 LC_ALL=zh_CN.UTF-8 -c "$TTYD_USER:$TTYD_PASS" $TTYD_CMD
+    exec env LANG=zh_CN.UTF-8 LC_ALL=zh_CN.UTF-8 ttyd -W -c "$TTYD_USER:$TTYD_PASS" $TTYD_CMD
 else
     echo "[INFO] Starting ttyd without auth..."
-    exec ttyd -W env LANG=zh_CN.UTF-8 LC_ALL=zh_CN.UTF-8 $TTYD_CMD
+    exec env LANG=zh_CN.UTF-8 LC_ALL=zh_CN.UTF-8 ttyd -W $TTYD_CMD
 fi
 
 # ===============================
