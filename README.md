@@ -94,5 +94,30 @@ environment:
 - 如果session不存在则自动创建
 - 支持密码认证登录
 - 支持自定义端口（host模式下特别有用）
+
+### SFTP文件传输
+
+SSH服务已启用SFTP功能，可以使用SFTP客户端进行文件传输：
+
+**使用sftp命令：**
+```bash
+# 默认端口
+sftp root@your-container-ip
+
+# 自定义端口
+sftp -P 2222 root@your-container-ip
+```
+
+**使用图形化SFTP客户端（如FileZilla、WinSCP）：**
+- 主机: your-container-ip
+- 端口: 2222 (或你设置的SSH_PORT)
+- 用户名: root
+- 密码: password (或你设置的SSH_PASSWORD)
+- 协议: SFTP - SSH File Transfer Protocol
+
+**常用目录：**
+- `/app/config/` - 配置文件目录
+- `/app/backup/` - 备份文件目录
+- `/mnt/disk1/` - 音乐存储目录（需映射）
  
 本简易说明只针对技术小白，大佬们请自行修改使用  

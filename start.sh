@@ -88,6 +88,14 @@ sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_c
 sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
 sed -i 's/PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config
 
+# 启用SFTP子系统（如果未启用）
+if ! grep -q "^Subsystem sftp" /etc/ssh/sshd_config; then
+    echo "Subsystem sftp /usr/lib/openssh/sftp-server" >> /etc/ssh/sshd_config
+    echo "[INFO] SFTP subsystem enabled"
+else
+    echo "[INFO] SFTP subsystem already configured"
+fi
+
 # 配置SSH端口
 if [ -n "$SSH_PORT" ] && [ "$SSH_PORT" != "22" ]; then
     # 如果指定了非默认端口，修改sshd_config
