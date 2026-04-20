@@ -109,6 +109,11 @@ fi
 cat > /usr/local/bin/tmux-shell << 'EOF'
 #!/bin/bash
 
+# 设置中文locale
+export LANG=zh_CN.UTF-8
+export LC_ALL=zh_CN.UTF-8
+export LANGUAGE=zh_CN:zh
+
 # 检查是否为交互式shell（有终端）
 # SFTP/SCP等非交互式连接不会有tty
 if [ -t 0 ]; then
