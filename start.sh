@@ -64,25 +64,39 @@ echo "[INFO] Configuring SSH service..."
 
 # 设置SSH用户密码（从环境变量获取）
 if [ -n "$SSH_USER" ] && [ -n "$SSH_PASSWORD" ]; then
-    # 如果用户指定了用户名且不是root，则创建该用户
+    # 如果指定了非root用户，则创建该用户
     if [ "$SSH_USER" != "root" ]; then
         if ! id "$SSH_USER" &>/dev/null; then
             useradd -m -s /usr/local/bin/tmux-shell "$SSH_USER"
         fi
+        echo "${SSH_USER}:${SSH_PASSWORD}" | chpasswd
+        echo "[INFO] SSH user '$SSH_USER' created (non-root)"
+    else
+        # 如果使用root用户，直接设置密码
+        echo "root:${SSH_PASSWORD}" | chpasswd
+        echo "[INFO] SSH root login enabled"
     fi
-    echo "${SSH_USER}:${SSH_PASSWORD}" | chpasswd
 else
-    # 如果没有设置环境变量，则使用默认的sshuser账户
-    if ! id "sshuser" &>/dev/null; then
-        useradd -m -s /usr/local/bin/tmux-shell sshuser
-    fi
-    echo 'sshuser:password' | chpasswd
+    # 默认使用root用户，密码为password
+    echo 'root:password' | chpasswd
+    echo "[INFO] Using default root login (password: password)"
 fi
 
-# 配置SSH允许密码认证和密码登录
+# 配置SSH允许密码认证和root登录
 sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
 sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config
 sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+sed -i 's/PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config
+
+# 配置SSH端口
+if [ -n "$SSH_PORT" ] && [ "$SSH_PORT" != "22" ]; then
+    # 如果指定了非默认端口，修改sshd_config
+    sed -i "s/#Port 22/Port $SSH_PORT/" /etc/ssh/sshd_config
+    sed -i "s/^Port 22$/Port $SSH_PORT/" /etc/ssh/sshd_config
+    echo "[INFO] SSH port set to $SSH_PORT"
+else
+    echo "[INFO] Using default SSH port 22"
+fi
 
 # 创建SSH登录脚本，直接attach到tmux session
 cat > /usr/local/bin/tmux-shell << 'EOF'

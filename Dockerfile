@@ -98,8 +98,9 @@ RUN mkdir -p /run/sshd
 # 环境变量
 ENV TTYD_USER=""
 ENV TTYD_PASS=""
-ENV SSH_USER="sshuser"
+ENV SSH_USER="root"
 ENV SSH_PASSWORD="password"
+ENV SSH_PORT="22"
 
 # 暴露SSH端口
 EXPOSE 22

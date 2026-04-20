@@ -43,26 +43,56 @@
 
 ## SSH访问功能
 
-本镜像现已支持通过SSH直接连接到tmux session：
+本镜像现已支持通过SSH直接连接到tmux session，**SSH用户与ttyd使用相同权限（root）**：
 
 ### SSH连接方式
+
+**默认端口（22）：**
 ```bash
-ssh sshuser@your-container-ip
+ssh root@your-container-ip
 # 默认密码: password
 ```
 
-### 自定义SSH用户和密码
-在docker-compose.yml中设置环境变量：
-```yaml
-environment:
-  SSH_USER: "myuser"
-  SSH_PASSWORD: "mypassword"
+**自定义端口：**
+```bash
+ssh root@your-container-ip -p 2222
+# 默认密码: password
 ```
 
+### 环境变量配置
+在docker-compose.yml中设置：
+```yaml
+environment:
+  SSH_USER: "root"              # SSH用户名（默认：root）
+  SSH_PASSWORD: "password"      # SSH密码（默认：password）
+  SSH_PORT: "2222"              # SSH端口（默认：22）
+```
+
+### 使用场景
+
+**1. Bridge 网络模式（推荐新手）：**
+```yaml
+network_mode: bridge
+ports:
+  - "7681:7681"    # ttyd
+  - "2122:22"      # SSH映射到宿主机2122端口
+```
+连接：`ssh root@localhost -p 2122`
+
+**2. Host 网络模式（高性能）：**
+```yaml
+network_mode: host
+environment:
+  SSH_PORT: "2222"  # 修改SSH端口避免与宿主机冲突
+```
+连接：`ssh root@localhost -p 2222`
+
 ### SSH特性
+- **与ttyd完全相同的root权限**
 - 连接后自动attach到amdl tmux session
+- SSH和ttyd共享同一个session，可以看到彼此的操作
 - 如果session不存在则自动创建
 - 支持密码认证登录
-- 默认暴露22端口（使用host网络模式时直接使用宿主机端口）
+- 支持自定义端口（host模式下特别有用）
  
 本简易说明只针对技术小白，大佬们请自行修改使用  

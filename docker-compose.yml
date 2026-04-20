@@ -11,16 +11,18 @@ services:
   amdl_m:
     container_name: amdl
     image: ghcr.io/chas0000/amdl_m:latest #或chaslllll/amdl_m:latest
-    network_mode: bridge
-    #environment:
-    #  TTYD_USER: ""                  #TTYD的用户名和密码，两者都设定时才起效，否则为无鉴权模式
-    #  TTYD_PASS: ""
-    #  SSH_USER: "myuser"             #SSH登录用户名（默认：sshuser）
-    #  SSH_PASSWORD: "mypassword"     #SSH登录密码（默认：password）
+    network_mode: host
+    environment:
+      TTYD_USER: ""                  #TTYD的用户名和密码，两者都设定时才起效，否则为无鉴权模式
+      TTYD_PASS: ""
+      SSH_USER: "root"               #SSH登录用户名（默认：root，与ttyd同权限）
+      SSH_PASSWORD: "password"       #SSH登录密码（默认：password）
+      SSH_PORT: "2122"               #SSH端口（默认：22，host模式下可修改避免冲突）
     # 如果不使用 host 模式，可以使用端口映射
-    ports:
-       - "7681:7681"
-       - "2122:22"
+    #network_mode: bridge
+    #ports:
+    #   - "7681:7681"
+    #   - "2122:22"
     volumes:
       - /mnt/disk1:/mnt/disk1        #映射需要保持音乐的目录，后半段需与config.toml中一致，自己修改
       - ./config/:/app/config/      #amdl的config存放位置，第一次运行时会自动拷贝备份
