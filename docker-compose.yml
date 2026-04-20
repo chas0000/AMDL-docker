@@ -4,7 +4,7 @@ services:
     image: ghcr.io/chas0000/amdl_wrapper:latest  #或chaslllll/amdl_wrapper:latest
     network_mode: host
     #ports:
-    #   - "8880:8080"     # 如果不使用 host 模式，可以使用端口映射 8080是管理端口，还要放行市里端口如10200、20200
+    #   - "8880:8080"     # 如果不使用 host 模式，可以使用端口映射 8080是管理端口，还要放行实例端口如10200、20200
     volumes:
       - ./instances/:/app/wrapper/instances  #各区wrapper保存位置
       - ./config/:/app/config/  
