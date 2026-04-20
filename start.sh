@@ -144,38 +144,13 @@ elif [ "$SSH_USER" = "root" ]; then
     # 修改root的家目录为/app
     sed -i 's|^root:x:0:0:root:/root:|root:x:0:0:root:/app:|' /etc/passwd
     
-    # 创建通用的tmux attach脚本
-    TMUX_ATTACH_SCRIPT='
-# Auto attach to tmux session if not already in tmux and has tty
-if [ -z "$TMUX" ] && [ -t 0 ] && [ -z "$SSH_TMUX_AUTO_ATTACHED" ]; then
-    SESSION_NAME="amdl"
-    export SSH_TMUX_AUTO_ATTACHED=1
+    # 在sshd_config末尾添加ForceCommand配置，强制root用户使用tmux-shell
+    echo '' >> /etc/ssh/sshd_config
+    echo '# Force root user to use tmux-shell' >> /etc/ssh/sshd_config
+    echo 'Match User root' >> /etc/ssh/sshd_config
+    echo '    ForceCommand /usr/local/bin/tmux-shell' >> /etc/ssh/sshd_config
     
-    if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
-        tmux attach -t "$SESSION_NAME"
-    else
-        tmux new-session -d -s "$SESSION_NAME" -c /app
-        tmux attach -t "$SESSION_NAME"
-    fi
-    exit 0
-fi
-'
-    
-    # 添加到 .bashrc
-    echo "$TMUX_ATTACH_SCRIPT" >> /root/.bashrc
-    
-    # 添加到 .profile (login shell 会读取)
-    echo "$TMUX_ATTACH_SCRIPT" >> /root/.profile
-    
-    # 如果 .bash_profile 存在，也添加
-    if [ -f /root/.bash_profile ]; then
-        echo "$TMUX_ATTACH_SCRIPT" >> /root/.bash_profile
-    else
-        # 否则创建 .bash_profile 并让它 sourcing .profile
-        echo '[ -f ~/.profile ] && . ~/.profile' > /root/.bash_profile
-    fi
-    
-    echo "[INFO] Set root home to /app and added auto tmux attach"
+    echo "[INFO] Set root home to /app and configured ForceCommand for tmux"
 fi
 
 # 启动SSH服务
