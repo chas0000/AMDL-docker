@@ -43,7 +43,7 @@ jobs:
           CGO_ENABLED=0 GOOS=linux GOARCH=$ARCH go build -a -o dl-$ARCH main.go
           mv dl-$ARCH ${GITHUB_WORKSPACE}/output/
         done
-        cp config.yaml ${GITHUB_WORKSPACE}/output/
+        cp config.yaml.example ${GITHUB_WORKSPACE}/output/config.yaml
 
     - name: Build apple-music-downloader (sky8282)
       run: |
