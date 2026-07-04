@@ -33,7 +33,7 @@ RUN set -eux; \
     fi
 
 # 最终镜像
-FROM ubuntu:22.04
+FROM debian:bookworm-slim
 
 # 从 builder 阶段复制 wrapper 文件
 COPY --from=builder /build/wrapper /app/wrapper
