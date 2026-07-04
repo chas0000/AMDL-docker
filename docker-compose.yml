@@ -2,6 +2,7 @@ services:
   wrapper:
     container_name: wrapper
     image: ghcr.io/chas0000/amdl_wrapper:latest  #或chaslllll/amdl_wrapper:latest
+    privileged: true
     network_mode: host
     #ports:
     #   - "8880:8080"     # 如果不使用 host 模式，可以使用端口映射 8080是管理端口，还要放行实例端口如10200、20200
